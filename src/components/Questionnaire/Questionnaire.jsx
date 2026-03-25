@@ -1,95 +1,207 @@
-import { useState } from 'react';
-import { questions, frequencyMapping, natureSounds } from './questions';
+import { useState, useEffect } from 'react';
+import { getOrderedQuestions, validateAnswers, getQuestionProgress } from './questions';
+import { mapAnswersToRoutine } from '../../utils/frequencyMapper';
 import './Questionnaire.css';
 
-export default function Questionnaire({ onComplete }) {
+export default function Questionnaire({ onComplete, onBack }) {
   const [answers, setAnswers] = useState({});
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [errors, setErrors] = useState({});
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const handleAnswer = (questionId, value) => {
+  const questions = getOrderedQuestions();
+  const currentQuestion = questions[currentStep];
+  const progress = getQuestionProgress(currentStep, questions.length);
+
+  // Manejar respuesta de tipo escala (1-10)
+  const handleScaleAnswer = (questionId, value) => {
+    setAnswers(prev => ({ ...prev, [questionId]: parseInt(value) }));
+    setErrors(prev => ({ ...prev, [questionId]: null }));
+  };
+
+  // Manejar respuesta de opción única
+  const handleSingleAnswer = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
+    setErrors(prev => ({ ...prev, [questionId]: null }));
     
-    if (currentQuestion < questions.length - 1) {
-      setTimeout(() => setCurrentQuestion(prev => prev + 1), 200);
+    // Avanzar automáticamente con pequeña animación
+    setIsAnimating(true);
+    setTimeout(() => {
+      if (currentStep < questions.length - 1) {
+        setCurrentStep(prev => prev + 1);
+      }
+      setIsAnimating(false);
+    }, 250);
+  };
+
+  // Navegación manual entre preguntas
+  const handleNext = () => {
+    if (currentStep < questions.length - 1) {
+      setCurrentStep(prev => prev + 1);
     }
   };
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    
-    // Calcular perfil basado en respuestas
-    const goal = answers.goal || 'relax';
-    const protocol = frequencyMapping[goal];
-    
-    const routine = {
-      carrierFreq: protocol.carrier,
-      beatFreq: protocol.beat,
-      band: protocol.band,
-      natureSound: natureSounds[answers.nature_preference] || null,
-      duration: calculateDuration(answers),
-      timestamp: new Date().toISOString(),
-      answers
-    };
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
 
-    // Guardar en backend (opcional)
-    try {
-      await fetch('https://tu-backend.onrender.com/api/routines', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(routine)
-      });
-    } catch (error) {
-      console.warn('Error guardando rutina:', error);
-      // Continuar aunque falle el backend (funciona offline)
+  // Enviar respuestas y generar rutina
+  const handleSubmit = () => {
+    const validation = validateAnswers(answers);
+    
+    if (!validation.valid) {
+      setErrors({ submit: validation.message });
+      // Scroll al error
+      const errorElement = document.querySelector('.error-message');
+      errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
 
-    setIsSubmitting(false);
-    onComplete(routine);
+    // Generar rutina personalizada
+    const routine = mapAnswersToRoutine(answers);
+    
+    // Callback al componente padre
+    onComplete?.(routine);
   };
 
-  const calculateDuration = (answers) => {
-    // Duración basada en nivel de estrés
-    const stressLevel = answers.stress_frequency || 3;
-    if (stressLevel >= 4) return 1800; // 30 min
-    if (stressLevel >= 3) return 900;  // 15 min
-    return 300; // 5 min
-  };
+  // Renderizar input según tipo de pregunta
+  const renderQuestionInput = (question) => {
+    switch (question.type) {
+      case 'scale':
+        return (
+          <div className="scale-input-container">
+            <input
+              type="range"
+              min={question.min}
+              max={question.max}
+              value={answers[question.id] || question.min}
+              onChange={(e) => handleScaleAnswer(question.id, e.target.value)}
+              className="scale-slider"
+              style={{
+                background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${((answers[question.id] || question.min) - question.min) / (question.max - question.min) * 100}%, rgba(255,255,255,0.1) ${((answers[question.id] || question.min) - question.min) / (question.max - question.min) * 100}%, rgba(255,255,255,0.1) 100%)`
+              }}
+            />
+            <div className="scale-labels">
+              <span className="scale-min">{question.labels[question.min]}</span>
+              <span className="scale-value">{answers[question.id] || question.min}</span>
+              <span className="scale-max">{question.labels[question.max]}</span>
+            </div>
+          </div>
+        );
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const question = questions[currentQuestion];
+      case 'single':
+        return (
+          <div className="options-grid">
+            {question.options.map(option => (
+              <button
+                key={option.value}
+                className={`option-card ${answers[question.id] === option.value ? 'selected' : ''}`}
+                onClick={() => handleSingleAnswer(question.id, option.value)}
+                type="button"
+              >
+                <div className="option-icon">{option.label.split(' ')[0]}</div>
+                <div className="option-content">
+                  <span className="option-label">{option.label.replace(/^[^\s]+\s/, '')}</span>
+                  {option.description && (
+                    <span className="option-description">{option.description}</span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="questionnaire-container">
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
-      </div>
-      
-      <div className="question-card">
-        <h2>{question.text}</h2>
-        
-        <div className="options-grid">
-          {question.options.map(option => (
-            <button
-              key={option.value}
-              className="option-btn"
-              onClick={() => handleAnswer(question.id, option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
+    <div className="questionnaire-wrapper">
+      {/* Header con progreso */}
+      <div className="questionnaire-header">
+        <button className="back-btn" onClick={onBack} type="button">
+          ← Volver
+        </button>
+        <div className="progress-container">
+          <div className="progress-bar">
+            <div 
+              className="progress-fill" 
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="progress-text">{progress}% Completado</span>
+        </div>
+        <div className="step-counter">
+          Pregunta {currentStep + 1} de {questions.length}
         </div>
       </div>
 
-      {currentQuestion === questions.length - 1 && (
-        <button 
-          className="submit-btn"
-          onClick={handleSubmit}
-          disabled={isSubmitting || Object.keys(answers).length < questions.length}
-        >
-          {isSubmitting ? 'Generando rutina...' : 'Comenzar sesión'}
-        </button>
+      {/* Tarjeta de pregunta */}
+      <div className={`question-card ${isAnimating ? 'animating' : ''}`}>
+        <div className="question-content">
+          <h2 className="question-text">{currentQuestion.text}</h2>
+          
+          {currentQuestion.hint && (
+            <p className="question-hint">💡 {currentQuestion.hint}</p>
+          )}
+          
+          <div className="question-input">
+            {renderQuestionInput(currentQuestion)}
+          </div>
+        </div>
+      </div>
+
+      {/* Mensajes de error */}
+      {errors.submit && (
+        <div className="error-message" role="alert">
+          ⚠️ {errors.submit}
+        </div>
       )}
+      {errors[currentQuestion?.id] && (
+        <div className="error-message" role="alert">
+          ⚠️ {errors[currentQuestion.id]}
+        </div>
+      )}
+
+      {/* Navegación */}
+      <div className="navigation-buttons">
+        {currentStep > 0 && (
+          <button 
+            className="nav-btn secondary" 
+            onClick={handlePrevious}
+            type="button"
+          >
+            ← Anterior
+          </button>
+        )}
+        
+        {currentStep < questions.length - 1 ? (
+          <button 
+            className="nav-btn primary" 
+            onClick={handleNext}
+            disabled={answers[currentQuestion?.id] === undefined}
+            type="button"
+          >
+            Siguiente →
+          </button>
+        ) : (
+          <button 
+            className="nav-btn submit" 
+            onClick={handleSubmit}
+            type="button"
+          >
+            🎧 Generar Mi Rutina Personalizada
+          </button>
+        )}
+      </div>
+
+      {/* Info de privacidad */}
+      <p className="privacy-note">
+        Tus respuestas se procesan localmente. No se comparten con terceros.
+      </p>
     </div>
   );
 }

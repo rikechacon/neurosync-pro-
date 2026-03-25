@@ -1,99 +1,112 @@
-// Basado en escalas validadas (PSS-10 adaptado)
+/**
+ * Configuración de preguntas del cuestionario de evaluación
+ * Basado en escalas validadas (adaptación de PSS-10)
+ */
+
 export const questions = [
   {
-    id: 'stress_frequency',
-    text: '¿Con qué frecuencia te sientes estresado/a?',
+    id: 'stress_level',
+    text: '¿Cómo calificarías tu nivel de estrés actual?',
     type: 'scale',
-    options: [
-      { value: 1, label: 'Nunca' },
-      { value: 2, label: 'Casi nunca' },
-      { value: 3, label: 'A veces' },
-      { value: 4, label: 'Frecuentemente' },
-      { value: 5, label: 'Muy frecuentemente' }
-    ],
-    domain: 'emotional'
+    min: 1,
+    max: 10,
+    labels: { 
+      1: 'Muy relajado', 
+      5: 'Moderado', 
+      10: 'Muy estresado' 
+    },
+    hint: 'Piensa en las últimas 24 horas',
+    required: true,
+    order: 1
   },
   {
     id: 'sleep_quality',
-    text: '¿Cómo calificarías tu calidad de sueño?',
+    text: '¿Cómo ha sido tu calidad de sueño esta semana?',
     type: 'scale',
-    options: [
-      { value: 1, label: 'Muy mala' },
-      { value: 2, label: 'Mala' },
-      { value: 3, label: 'Regular' },
-      { value: 4, label: 'Buena' },
-      { value: 5, label: 'Excelente' }
-    ],
-    domain: 'sleep'
-  },
-  {
-    id: 'mental_load',
-    text: '¿Sientes que tienes demasiadas cosas en tu mente?',
-    type: 'scale',
-    options: [
-      { value: 1, label: 'Nada' },
-      { value: 2, label: 'Un poco' },
-      { value: 3, label: 'Moderadamente' },
-      { value: 4, label: 'Bastante' },
-      { value: 5, label: 'Mucho' }
-    ],
-    domain: 'cognitive'
-  },
-  {
-    id: 'physical_tension',
-    text: '¿Experimentas tensión física (hombros, cuello, mandíbula)?',
-    type: 'scale',
-    options: [
-      { value: 1, label: 'Nunca' },
-      { value: 2, label: 'Rara vez' },
-      { value: 3, label: 'A veces' },
-      { value: 4, label: 'Frecuentemente' },
-      { value: 5, label: 'Siempre' }
-    ],
-    domain: 'physical'
+    min: 1,
+    max: 10,
+    labels: { 
+      1: 'Muy mala', 
+      5: 'Regular', 
+      10: 'Excelente' 
+    },
+    hint: 'Considera profundidad y descanso al despertar',
+    required: true,
+    order: 2
   },
   {
     id: 'goal',
-    text: '¿Cuál es tu principal objetivo?',
+    text: '¿Cuál es tu principal objetivo en esta sesión?',
     type: 'single',
     options: [
-      { value: 'relax', label: 'Relajación profunda' },
-      { value: 'focus', label: 'Concentración' },
-      { value: 'sleep', label: 'Mejorar sueño' },
-      { value: 'energy', label: 'Más energía' },
-      { value: 'anxiety', label: 'Reducir ansiedad' }
+      { value: 'relax', label: '🧘 Relajación profunda', description: 'Libera tensión y calma la mente' },
+      { value: 'focus', label: '🎯 Concentración', description: 'Mejora el enfoque y la claridad mental' },
+      { value: 'sleep', label: '😴 Mejorar sueño', description: 'Prepara tu cuerpo para descansar' },
+      { value: 'energy', label: '⚡ Más energía', description: 'Activa tu vitalidad natural' },
+      { value: 'anxiety', label: '🕊️ Reducir ansiedad', description: 'Calma pensamientos acelerados' },
+      { value: 'meditation', label: '🧘‍♂️ Meditación', description: 'Profundiza tu práctica meditativa' },
+      { value: 'schumann_fundamental', label: '🌍 Schumann 7.83Hz', description: 'Conecta con la resonancia terrestre' }
     ],
-    domain: 'goal'
+    hint: 'Elige lo que más necesitas ahora',
+    required: true,
+    order: 3
   },
   {
     id: 'nature_preference',
     text: '¿Qué sonido de fondo prefieres?',
     type: 'single',
     options: [
-      { value: 'rain', label: '🌧️ Lluvia ligera' },
-      { value: 'ocean', label: '🌊 Olas del mar' },
-      { value: 'stream', label: '🏞️ Arroyo' },
-      { value: 'birds', label: '🐦 Pájaros' },
-      { value: 'crickets', label: '🦗 Grillos y ranas' },
-      { value: 'none', label: '🔇 Sin sonido de fondo' }
+      { value: 'rain', label: '🌧️ Lluvia ligera', description: 'Gotas suaves y constantes' },
+      { value: 'ocean', label: '🌊 Olas del mar', description: 'Ritmo relajante del océano' },
+      { value: 'stream', label: '🏞️ Arroyo', description: 'Agua fluyendo en naturaleza' },
+      { value: 'birds', label: '🐦 Pájaros', description: 'Canto matutino de aves' },
+      { value: 'crickets', label: '🦗 Grillos y ranas', description: 'Ambiente nocturno tranquilo' },
+      { value: 'none', label: '🔇 Sin sonido de fondo', description: 'Solo el beat binaural' }
     ],
-    domain: 'preference'
+    hint: 'Puedes ajustar el volumen después',
+    required: true,
+    order: 4
+  },
+  {
+    id: 'duration',
+    text: '¿Cuánto tiempo tienes disponible?',
+    type: 'single',
+    options: [
+      { value: 300, label: '5 minutos', description: 'Rápido - Ideal para pausas' },
+      { value: 900, label: '15 minutos', description: 'Estándar - Sesión completa' },
+      { value: 1800, label: '30 minutos', description: 'Profundo - Máximo beneficio' }
+    ],
+    hint: 'Más tiempo = mayor efecto de sincronización',
+    required: true,
+    order: 5
   }
 ];
 
-export const frequencyMapping = {
-  relax: { carrier: 400, beat: 6, band: 'theta' },      // 4-8 Hz
-  focus: { carrier: 400, beat: 12, band: 'alpha' },     // 8-14 Hz
-  sleep: { carrier: 400, beat: 3, band: 'delta' },      // 0.5-4 Hz
-  energy: { carrier: 400, beat: 20, band: 'beta' },     // 14-30 Hz
-  anxiety: { carrier: 400, beat: 8, band: 'alpha' }     // 8-14 Hz
+// Ordenar preguntas por orden definido
+export const getOrderedQuestions = () => {
+  return [...questions].sort((a, b) => a.order - b.order);
 };
 
-export const natureSounds = {
-  rain: '/sounds/rain.mp3',
-  ocean: '/sounds/ocean.mp3',
-  stream: '/sounds/stream.mp3',
-  birds: '/sounds/birds.mp3',
-  crickets: '/sounds/crickets.mp3',
-  none: null
+// Validación de respuestas
+export const validateAnswers = (answers) => {
+  const requiredQuestions = questions.filter(q => q.required);
+  
+  const missing = requiredQuestions.filter(q => {
+    const value = answers[q.id];
+    return value === undefined || value === null || value === '';
+  });
+  
+  if (missing.length > 0) {
+    return {
+      valid: false,
+      message: `Por favor responde: ${missing.map(q => q.text.split('?')[0]).join(', ')}?`
+    };
+  }
+  
+  return { valid: true };
+};
+
+// Progreso del cuestionario
+export const getQuestionProgress = (currentQuestionIndex, totalQuestions) => {
+  return Math.round(((currentQuestionIndex + 1) / totalQuestions) * 100);
 };
