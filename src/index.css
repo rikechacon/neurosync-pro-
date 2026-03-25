@@ -1,0 +1,137 @@
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --text: #e8e8e8;
+  --text-muted: #a0a0a0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* PWA: Evitar zoom accidental */
+button, input {
+  touch-action: manipulation;
+}
+
+/* Progress Bar */
+.progress-bar {
+  height: 4px;
+  background: var(--card);
+  border-radius: 2px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+/* Question Cards */
+.question-card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 16px;
+  margin: 1rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.options-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.option-btn {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid transparent;
+  padding: 1rem;
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-btn:hover, .option-btn:active {
+  background: var(--primary);
+  border-color: var(--primary-dark);
+}
+
+/* Audio Player */
+.audio-player {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.visualizer {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  height: 60px;
+  margin-bottom: 2rem;
+}
+
+.wave {
+  width: 8px;
+  background: var(--primary);
+  border-radius: 4px;
+  animation: none;
+}
+
+.wave.active {
+  animation: visualize 1s ease-in-out infinite;
+}
+
+@keyframes visualize {
+  0%, 100% { height: 20px; }
+  50% { height: 60px; }
+}
+
+.play-btn {
+  background: var(--primary);
+  border: none;
+  padding: 1rem 3rem;
+  border-radius: 50px;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 1rem 0;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.headphone-warning {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
