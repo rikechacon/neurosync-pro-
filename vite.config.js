@@ -1,3 +1,4 @@
+cat > vite.config.js << 'EOF'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -7,11 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png'],
+      includeAssets: ['favicon.ico', 'icons/*.png', 'sounds/*.mp3'],
       manifest: {
-        name: 'NeuroSync-Pro - Sonidos Binaurales',
+        name: 'NeuroSync Pro - Estimulación Neurosensorial',
         short_name: 'NeuroSync',
-        description: 'Rutinas personalizadas de sonidos binaurales para reducir estrés',
+        description: 'Rutinas personalizadas de sonidos binaurales, frecuencia Schumann y estimulación multimodal',
         theme_color: '#1a1a2e',
         background_color: '#1a1a2e',
         display: 'standalone',
@@ -39,12 +40,17 @@ export default defineConfig({
               cacheName: 'sounds-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 días
+                maxAgeSeconds: 30 * 24 * 60 * 60
               }
             }
           }
         ]
       }
     })
-  ]
+  ],
+  server: {
+    host: '0.0.0.0',
+    port: 5173
+  }
 })
+EOF
