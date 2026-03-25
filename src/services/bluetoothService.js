@@ -1,147 +1,95 @@
-/**
- * Servicio de comunicación Bluetooth Low Energy (BLE)
- * Usa Web Bluetooth API (Chrome, Edge, Android)
- */
-
-export const NEUROSYNC_SERVICE_UUID = '0000neuro-0000-1000-8000-00805f9b34fb';
-export const NEUROSYNC_CHARACTERISTIC_UUID = '0000data-0000-1000-8000-00805f9b34fb';
+// src/services/bluetoothService.js
 
 export class BluetoothService {
   constructor() {
     this.device = null;
     this.server = null;
     this.characteristic = null;
-    this.isConnected = false;
   }
 
-  /**
-   * Solicita conexión a dispositivo NeuroSync
-   */
-  async connect() {
+  async isSupported() {
+    // Verificar si el navegador soporta Web Bluetooth
+    return 'bluetooth' in navigator;
+  }
+
+  async connect(deviceName = null) {
     try {
-      if (!navigator.bluetooth) {
-        throw new Error('Web Bluetooth no soportado en este navegador');
+      if (!this.isSupported()) {
+        throw new Error('Web Bluetooth no está soportado en este navegador. Usa Chrome, Edge o Android.');
       }
 
+      // Solicitar dispositivo al usuario
       this.device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [NEUROSYNC_SERVICE_UUID] }],
-        optionalServices: ['battery_service']
+        filters: [{ namePrefix: 'NeuroSync' }], // Filtra por nombre
+        optionalServices: [
+          '0000neuro-0000-1000-8000-00805f9b34fb', // Tu servicio personalizado
+          'battery_service' // Servicio estándar de batería
+        ]
       });
 
+      // Conectar al servidor GATT
       this.server = await this.device.gatt.connect();
-      this.characteristic = await this.server.getPrimaryService(NEUROSYNC_SERVICE_UUID)
-        .then(service => service.getCharacteristic(NEUROSYNC_CHARACTERISTIC_UUID));
-
-      this.isConnected = true;
       
-      // Configurar notificaciones para datos del dispositivo
-      await this.characteristic.startNotifications();
-      this.characteristic.addEventListener('characteristicvaluechanged', 
-        (event) => this.handleDeviceData(event));
+      // Obtener servicio y característica
+      const service = await this.server.getPrimaryService(
+        '0000neuro-0000-1000-8000-00805f9b34fb'
+      );
+      this.characteristic = await service.getCharacteristic(
+        '0000data-0000-1000-8000-00805f9b34fb'
+      );
 
-      return { success: true, deviceName: this.device.name };
+      // Configurar notificaciones (opcional)
+      await this.characteristic.startNotifications();
+      this.characteristic.addEventListener('characteristicvaluechanged', (event) => {
+        this.handleIncomingData(event.target.value);
+      });
+
+      return { 
+        success: true, 
+        deviceName: this.device.name,
+        batteryLevel: await this.getBatteryLevel()
+      };
+
     } catch (error) {
-      console.error('Error conectando Bluetooth:', error);
+      console.error('Error en conexión Bluetooth:', error);
       return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Envía configuración de sesión al hardware
-   */
-  async sendSessionConfig(config) {
-    if (!this.isConnected || !this.characteristic) {
-      throw new Error('No hay dispositivo conectado');
+  async sendCommand(command, payload = {}) {
+    if (!this.characteristic) {
+      throw new Error('No hay característica conectada');
     }
 
-    // Validar límites de seguridad antes de enviar
-    const validatedConfig = this.validateSafetyLimits(config);
-
-    // Protocolo de comando (ver hardwareProtocol.js)
-    const command = this.encodeCommand('SESSION_START', validatedConfig);
-    const encoder = new TextEncoder();
+    // Codificar comando (ajusta según tu protocolo)
+    const data = new TextEncoder().encode(JSON.stringify({ command, payload }));
+    await this.characteristic.writeValue(data);
     
-    await this.characteristic.writeValue(encoder.encode(command));
     return { success: true };
   }
 
-  /**
-   * Detiene toda estimulación inmediatamente
-   */
-  async emergencyStop() {
-    if (!this.isConnected) return;
-
-    const encoder = new TextEncoder();
-    const command = this.encodeCommand('EMERGENCY_STOP', {});
-    await this.characteristic.writeValue(encoder.encode(command));
-  }
-
-  /**
-   * Valida configuración contra límites de seguridad
-   */
-  validateSafetyLimits(config) {
-    const { SAFETY_LIMITS } = require('../constants/safety');
-
-    // Validar corriente eléctrica
-    if (config.electrodeCurrent_mA > SAFETY_LIMITS.tACS.maxCurrent_mA) {
-      config.electrodeCurrent_mA = SAFETY_LIMITS.tACS.recommendedCurrent_mA;
-      console.warn('Corriente reducida a límite seguro');
-    }
-
-    // Validar campo magnético
-    if (config.magneticField_mT > SAFETY_LIMITS.magnetic.maxField_mT) {
-      config.magneticField_mT = SAFETY_LIMITS.magnetic.recommendedField_mT;
-      console.warn('Campo magnético reducido a límite seguro');
-    }
-
-    // Validar frecuencia
-    if (config.frequency_Hz < SAFETY_LIMITS.magnetic.frequencyRange_Hz[0] ||
-        config.frequency_Hz > SAFETY_LIMITS.magnetic.frequencyRange_Hz[1]) {
-      config.frequency_Hz = 10; // Frecuencia por defecto segura
-      console.warn('Frecuencia ajustada a rango seguro');
-    }
-
-    return config;
-  }
-
-  /**
-   * Codifica comando en protocolo binario
-   */
-  encodeCommand(commandType, payload) {
-    const protocol = require('./hardwareProtocol');
-    return protocol.encode(commandType, payload);
-  }
-
-  /**
-   * Maneja datos recibidos del dispositivo
-   */
-  handleDeviceData(event) {
-    const value = event.target.value;
-    const protocol = require('./hardwareProtocol');
-    const decoded = protocol.decode(value);
-
-    // Actualizar estado en UI
-    if (window.hardwareStatusCallback) {
-      window.hardwareStatusCallback(decoded);
-    }
-
-    // Verificar emergencias
-    if (decoded.type === 'ALERT' || decoded.type === 'ERROR') {
-      this.emergencyStop();
-      if (window.emergencyCallback) {
-        window.emergencyCallback(decoded);
-      }
+  async getBatteryLevel() {
+    try {
+      const batteryService = await this.server.getPrimaryService('battery_service');
+      const batteryLevel = await batteryService.getCharacteristic('battery_level');
+      const value = await batteryLevel.readValue();
+      return value.getUint8(0);
+    } catch {
+      return null;
     }
   }
 
-  /**
-   * Desconecta dispositivo
-   */
+  handleIncomingData(dataView) {
+    const decoder = new TextDecoder();
+    const message = decoder.decode(dataView);
+    console.log('Datos recibidos:', message);
+    // Aquí puedes emitir eventos o actualizar estado
+  }
+
   async disconnect() {
-    if (this.device && this.device.gatt.connected) {
-      await this.emergencyStop();
+    if (this.device?.gatt?.connected) {
+      await this.characteristic?.stopNotifications();
       this.device.gatt.disconnect();
-      this.isConnected = false;
     }
   }
 }
