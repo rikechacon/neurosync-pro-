@@ -21,9 +21,6 @@
  * 
  * 3. RECOMENDACIÓN:
  *    - Iniciar SOLO con modo audio (sin hardware)
- *    - Hardware requiere validación clínica previa
- *    - Consultar con ingeniero biomédico certificado
- *    - Implementar múltiples capas de seguridad
- * 
+ *    * 
  * =====================================================
  */
