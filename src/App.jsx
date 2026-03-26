@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import Questionnaire from './components/Questionnaire/Questionnaire';
+import AudioPlayer from './components/AudioPlayer/AudioPlayer';
 import { checkBluetoothSupport } from './utils/bluetoothCheck';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('home'); // home, questionnaire, playing
+  const [currentView, setCurrentView] = useState('home');
   const [currentRoutine, setCurrentRoutine] = useState(null);
   const [btStatus, setBtStatus] = useState(null);
 
-  // Verificar soporte Bluetooth al montar
   useEffect(() => {
     checkBluetoothSupport().then(setBtStatus);
   }, []);
 
-  // Handlers de navegación
   const handleStartQuestionnaire = () => {
     setCurrentView('questionnaire');
   };
@@ -35,7 +34,6 @@ function App() {
 
   return (
     <div className="app">
-      {/* Header */}
       <header className="app-header">
         <div className="header-content">
           <h1 
@@ -49,7 +47,6 @@ function App() {
             Estimulación neurosensorial personalizada
           </p>
           
-          {/* Status indicators */}
           <div className="status-indicators">
             {btStatus && (
               <span className={`status-badge ${btStatus.supported ? 'success' : 'warning'}`}>
@@ -63,7 +60,6 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="app-main">
         {currentView === 'home' && (
           <HomeView 
@@ -80,7 +76,7 @@ function App() {
         )}
         
         {currentView === 'playing' && currentRoutine && (
-          <PlayingView 
+          <AudioPlayer 
             routine={currentRoutine}
             onComplete={handleSessionComplete}
             onBack={handleBackToHome}
@@ -88,7 +84,6 @@ function App() {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="app-footer">
         <p>© 2026 NeuroSync Pro • Usa auriculares estéreo para mejor experiencia</p>
         <p className="footer-disclaimer">
@@ -99,11 +94,9 @@ function App() {
   );
 }
 
-/* Vista Home */
 function HomeView({ onStart, btStatus }) {
   return (
     <div className="home-view">
-      {/* Welcome Card */}
       <div className="welcome-card">
         <h2>Bienvenido a NeuroSync Pro</h2>
         <p>
@@ -112,7 +105,6 @@ function HomeView({ onStart, btStatus }) {
         </p>
       </div>
 
-      {/* Features Grid */}
       <div className="features-grid">
         <FeatureCard 
           icon="🎧"
@@ -136,7 +128,6 @@ function HomeView({ onStart, btStatus }) {
         />
       </div>
 
-      {/* CTA Button */}
       <button 
         className="start-btn"
         onClick={onStart}
@@ -144,7 +135,6 @@ function HomeView({ onStart, btStatus }) {
         🎯 Comenzar Mi Sesión Personalizada
       </button>
 
-      {/* How It Works */}
       <div className="info-section">
         <h3>¿Cómo funciona?</h3>
         <ol>
@@ -155,12 +145,11 @@ function HomeView({ onStart, btStatus }) {
         </ol>
       </div>
 
-      {/* Bluetooth Notice */}
       {btStatus && !btStatus.supported && (
         <div className="notice-card warning">
           <p>⚠️ {btStatus.message}</p>
           <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-            El audio binaural funcionará igual. La conexión Bluetooth es opcional para hardware futuro.
+            El audio binaural funcionará igual. La conexión Bluetooth es opcional.
           </p>
         </div>
       )}
@@ -168,60 +157,6 @@ function HomeView({ onStart, btStatus }) {
   );
 }
 
-/* Vista Playing (placeholder por ahora) */
-function PlayingView({ routine, onComplete, onBack }) {
-  return (
-    <div className="playing-view">
-      <button className="back-btn" onClick={onBack}>← Volver</button>
-      
-      <div className="routine-summary">
-        <h2>{routine.icon} {routine.name}</h2>
-        <p className="routine-description">{routine.description}</p>
-        
-        <div className="routine-details">
-          <div className="detail-item">
-            <span className="detail-label">Frecuencia:</span>
-            <span className="detail-value">{routine.beatFreq} Hz ({routine.band})</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Duración:</span>
-            <span className="detail-value">{routine.durationLabel}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Sonido de fondo:</span>
-            <span className="detail-value">{routine.natureSoundName}</span>
-          </div>
-        </div>
-
-        <div className="benefits-list">
-          <h4>Beneficios esperados:</h4>
-          <ul>
-            {routine.benefits.map((benefit, idx) => (
-              <li key={idx}>✓ {benefit}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* Audio Player Placeholder */}
-      <div className="audio-player-placeholder">
-        <div className="visualizer">
-          <div className="bar" />
-          <div className="bar" />
-          <div className="bar" />
-          <div className="bar" />
-          <div className="bar" />
-        </div>
-        <p>🎧 Reproductor de audio en desarrollo...</p>
-        <button className="play-btn-placeholder" onClick={onComplete}>
-          ✅ Simular Sesión Completada
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* Componente FeatureCard reutilizable */
 function FeatureCard({ icon, title, description }) {
   return (
     <div className="feature-card">
