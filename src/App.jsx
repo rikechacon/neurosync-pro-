@@ -232,4 +232,4 @@ function FeatureCard({ icon, title, description }) {
   );
 }
 
-export default App;
+/* export default App;
