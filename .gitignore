@@ -4,3 +4,6 @@ node_modules/
 node_modules/.vite/
 .vite/
 node_modules/.vite/
+node_modules/
+.vite/
+node_modules/.package-lock.json
