@@ -340,3 +340,130 @@
 .question-card {
   animation: fadeInUp 0.3s ease forwards;
 }
+
+/* === Estilos para opciones agrupadas por categoría === */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.options-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.category-label {
+  color: #6366f1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* === Estilos para opción "Sanación" destacada === */
+.option-card.healing-trigger {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.option-card.healing-trigger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #22d3ee);
+}
+
+.option-card.healing-trigger.selected {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* === Badge de opción destacada === */
+.featured-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.option-card.featured {
+  position: relative;
+}
+
+.option-card.featured.selected {
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
+}
+
+/* === Caja de info de sanación === */
+.healing-info-box {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.1));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-left: 4px solid #10b981;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.healing-info-box p {
+  margin: 0.5rem 0;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.healing-info-box p:first-child {
+  margin-top: 0;
+  color: #e8e8e8;
+}
+
+.healing-info-box .disclaimer {
+  font-style: italic;
+  color: #666 !important;
+  font-size: 0.8rem;
+  margin-top: 1rem !important;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* === Animación de entrada para sub-pregunta === */
+@keyframes slideInConditional {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.question-card.conditional-show {
+  animation: slideInConditional 0.3s ease forwards;
+}
+
+/* === Responsive para opciones de sanación === */
+@media (min-width: 768px) {
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .options-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

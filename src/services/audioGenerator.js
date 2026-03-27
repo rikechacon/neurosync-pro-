@@ -1,6 +1,6 @@
 /**
- * Motor de Audio Binaural - Versión 3 (Timing Corregido)
- * Secuencia: 1) Cargar naturaleza, 2) Iniciar beats, 3) Sincronizar
+ * Motor de Audio Binaural - Versión Sanación
+ * Soporta frecuencias terapéuticas hasta 10000 Hz
  */
 
 export class BinauralAudioEngine {
@@ -15,22 +15,26 @@ export class BinauralAudioEngine {
     this.progressInterval = null;
     this.startTime = null;
     this.totalDuration = null;
-    
-    // Nodos de ganancia
     this.masterGain = null;
     this.beatsGain = null;
     this.natureGain = null;
     
-    // Estado
-    this.isNatureLoaded = false;
-    this.areBeatsStarted = false;
+    // Schumann scan
+    this.isSchumannScan = false;
+    this.scanSequence = null;
+    this.scanIndex = 0;
+    this.scanInterval = null;
+    this.currentBeatFreq = null;
+    
+    // Modo sanación
+    this.isHealingMode = false;
+    this.therapeuticFrequency = null;
   }
 
   async initialize() {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
       
-      // Cadena de audio: sources → gains → master → destination
       this.masterGain = this.audioContext.createGain();
       this.masterGain.gain.value = 0.8;
       this.masterGain.connect(this.audioContext.destination);
@@ -42,204 +46,248 @@ export class BinauralAudioEngine {
       this.natureGain = this.audioContext.createGain();
       this.natureGain.gain.value = 0.5;
       this.natureGain.connect(this.masterGain);
-      
-      console.log('✅ AudioContext creado');
     }
     
     if (this.audioContext.state === 'suspended') {
       await this.audioContext.resume();
-      console.log('✅ AudioContext resumed');
     }
   }
 
   async playRoutine(params) {
-    console.log('🎧 [1/4] Iniciando rutina:', params.beatFreq, 'Hz');
     await this.initialize();
-    
-    // Resetear estado
     this.stop();
-    this.isNatureLoaded = false;
-    this.areBeatsStarted = false;
 
-    const { carrierFreq, beatFreq, natureSoundUrl, duration } = params;
+    const { 
+      carrierFreq, 
+      beatFreq, 
+      natureSoundUrl, 
+      duration, 
+      isSchumann, 
+      schumannMode, 
+      scanSequence,
+      isHealing,
+      therapeuticFrequency
+    } = params;
+    
+    this.currentBeatFreq = beatFreq;
+    this.isHealingMode = !!isHealing;
+    this.therapeuticFrequency = therapeuticFrequency;
 
-    try {
-      // PASO 1: Cargar sonido de naturaleza PRIMERO (si existe)
-      if (natureSoundUrl) {
-        console.log('🎧 [2/4] Cargando sonido:', natureSoundUrl);
-        await this.loadNatureSound(natureSoundUrl);
-        this.isNatureLoaded = true;
-        console.log('✅ Naturaleza cargada');
-      }
-
-      // PASO 2: Iniciar beats binaurales
-      console.log('🎧 [3/4] Iniciando beats binaurales');
-      await this.startBeats(carrierFreq, beatFreq);
-      this.areBeatsStarted = true;
-      console.log('✅ Beats iniciados');
-
-      // PASO 3: Configurar temporizadores
-      this.isPlaying = true;
-      this.startTime = Date.now();
-      this.totalDuration = duration * 1000;
-      console.log('🎧 [4/4] Sesión activa - Duración:', duration, 'segundos');
-
-      // Parada automática
-      setTimeout(() => {
-        console.log('⏰ Sesión completada');
-        this.stop();
-        if (this.onComplete) this.onComplete();
-      }, duration * 1000);
-
-      // Loop de progreso
-      this.progressInterval = setInterval(() => {
-        if (this.onProgress && this.totalDuration) {
-          const elapsed = Date.now() - this.startTime;
-          const progress = Math.min(elapsed / this.totalDuration, 1);
-          this.onProgress(progress);
-        }
-      }, 100);
-
-      return true;
-    } catch (error) {
-      console.error('❌ Error en playRoutine:', error);
-      this.stop();
-      throw error;
+    // Configurar modo Schumann scan
+    if (isSchumann && schumannMode === 'scan' && scanSequence) {
+      this.isSchumannScan = true;
+      this.scanSequence = scanSequence;
+      this.scanIndex = 0;
+    } else {
+      this.isSchumannScan = false;
     }
+
+    // Iniciar audio según modo
+    if (this.isHealingMode && this.therapeuticFrequency) {
+      await this.startHealingFrequency(this.therapeuticFrequency, carrierFreq);
+    } else {
+      await this.startBeats(carrierFreq, this.currentBeatFreq);
+    }
+
+    // Cargar sonido de naturaleza
+    if (natureSoundUrl) {
+      await this.loadNatureSound(natureSoundUrl);
+    }
+
+    // Configurar scan de frecuencias si es modo Schumann scan
+    if (this.isSchumannScan) {
+      this.startSchumannScan(carrierFreq);
+    }
+
+    this.isPlaying = true;
+    this.startTime = Date.now();
+    this.totalDuration = duration * 1000;
+
+    // Parada automática
+    setTimeout(() => {
+      this.stop();
+      if (this.onComplete) this.onComplete();
+    }, duration * 1000);
+
+    // Loop de progreso
+    this.progressInterval = setInterval(() => {
+      if (this.onProgress && this.totalDuration) {
+        const elapsed = Date.now() - this.startTime;
+        const progress = Math.min(elapsed / this.totalDuration, 1);
+        this.onProgress(progress);
+      }
+    }, 100);
+
+    return true;
   }
 
   async startBeats(carrierFreq, beatFreq) {
-    // Crear osciladores
     this.leftOscillator = this.audioContext.createOscillator();
     this.rightOscillator = this.audioContext.createOscillator();
     
     const leftGain = this.audioContext.createGain();
     const rightGain = this.audioContext.createGain();
 
-    // Configurar frecuencias
     this.leftOscillator.frequency.value = carrierFreq;
     this.rightOscillator.frequency.value = carrierFreq + beatFreq;
     this.leftOscillator.type = 'sine';
     this.rightOscillator.type = 'sine';
 
-    // Volumen
     leftGain.gain.value = 0.25;
     rightGain.gain.value = 0.25;
 
-    // Conectar: oscilador → gain individual → beatsGain → master → destination
     this.leftOscillator.connect(leftGain);
     this.rightOscillator.connect(rightGain);
     leftGain.connect(this.beatsGain);
     rightGain.connect(this.beatsGain);
 
-    // Iniciar osciladores
     this.leftOscillator.start();
     this.rightOscillator.start();
   }
 
-  async loadNatureSound(url) {
-    console.log('📡 Fetching:', url);
+  async startHealingFrequency(therapeuticFreq, carrierFreq) {
+    console.log(`💚 Iniciando frecuencia terapéutica: ${therapeuticFreq} Hz`);
     
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    // Para frecuencias altas (>1000 Hz), usar tono puro en lugar de beats binaurales
+    if (therapeuticFreq > 1000) {
+      // Tono puro terapéutico
+      this.leftOscillator = this.audioContext.createOscillator();
+      this.rightOscillator = this.audioContext.createOscillator();
+      
+      this.leftOscillator.frequency.value = therapeuticFreq;
+      this.rightOscillator.frequency.value = therapeuticFreq; // Mismo en ambos oídos
+      this.leftOscillator.type = 'sine';
+      this.rightOscillator.type = 'sine';
+
+      // Volumen más suave para frecuencias altas
+      const highFreqGain = 0.1;
+      
+      const leftGain = this.audioContext.createGain();
+      const rightGain = this.audioContext.createGain();
+      leftGain.gain.value = highFreqGain;
+      rightGain.gain.value = highFreqGain;
+
+      this.leftOscillator.connect(leftGain);
+      this.rightOscillator.connect(rightGain);
+      leftGain.connect(this.beatsGain);
+      rightGain.connect(this.beatsGain);
+
+      this.leftOscillator.start();
+      this.rightOscillator.start();
+      
+      console.log(`✅ Tono terapéutico puro: ${therapeuticFreq} Hz`);
+    } 
+    // Para frecuencias Solfeggio (396-963 Hz), combinar con carrier para beats sutiles
+    else if (therapeuticFreq >= 396 && therapeuticFreq <= 963) {
+      this.leftOscillator = this.audioContext.createOscillator();
+      this.rightOscillator = this.audioContext.createOscillator();
+      
+      // Carrier bajo + frecuencia Solfeggio como beat
+      this.leftOscillator.frequency.value = carrierFreq;
+      this.rightOscillator.frequency.value = carrierFreq + therapeuticFreq;
+      this.leftOscillator.type = 'sine';
+      this.rightOscillator.type = 'sine';
+
+      const leftGain = this.audioContext.createGain();
+      const rightGain = this.audioContext.createGain();
+      leftGain.gain.value = 0.2;
+      rightGain.gain.value = 0.2;
+
+      this.leftOscillator.connect(leftGain);
+      this.rightOscillator.connect(rightGain);
+      leftGain.connect(this.beatsGain);
+      rightGain.connect(this.beatsGain);
+
+      this.leftOscillator.start();
+      this.rightOscillator.start();
+      
+      console.log(`✅ Solfeggio binaural: ${therapeuticFreq} Hz sobre carrier ${carrierFreq} Hz`);
     }
-    
-    console.log('📥 Decodificando audio...');
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-    
-    console.log('🎵 Buffer listo:', audioBuffer.duration.toFixed(2), 'segundos');
+    // Para frecuencias neurológicas (40-100 Hz), beats binaurales normales
+    else {
+      await this.startBeats(carrierFreq, therapeuticFreq);
+      console.log(`✅ Beats terapéuticos: ${therapeuticFreq} Hz`);
+    }
+  }
 
-    // Crear buffer source
-    this.natureSound = this.audioContext.createBufferSource();
-    this.natureSound.buffer = audioBuffer;
-    this.natureSound.loop = true;
+  startSchumannScan(carrierFreq) {
+    this.scanInterval = setInterval(() => {
+      if (!this.isPlaying) return;
+      
+      this.scanIndex = (this.scanIndex + 1) % this.scanSequence.length;
+      const newFreq = this.scanSequence[this.scanIndex];
+      this.currentBeatFreq = newFreq;
+      
+      if (this.rightOscillator && !this.isHealingMode) {
+        this.rightOscillator.frequency.value = carrierFreq + newFreq;
+      }
+      
+      console.log(`🔄 Schumann scan: ${newFreq.toFixed(2)} Hz`);
+    }, 30000);
+  }
 
-    // Conectar: buffer → natureGain → master → destination
-    this.natureSound.connect(this.natureGain);
-    
-    // Iniciar inmediatamente (no esperar a que los beats estén listos)
-    this.natureSound.start();
-    
-    console.log('✅ Sonido de naturaleza iniciado');
+  async loadNatureSound(url) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+
+      this.natureSound = this.audioContext.createBufferSource();
+      this.natureSound.buffer = audioBuffer;
+      this.natureSound.loop = true;
+      this.natureSound.connect(this.natureGain);
+      this.natureSound.start();
+    } catch (error) {
+      console.error('Error cargando sonido:', error);
+      throw error;
+    }
   }
 
   stop() {
-    console.log('🛑 Deteniendo todos los nodos');
-    
-    // Detener beats
     if (this.leftOscillator) {
-      try {
-        this.leftOscillator.stop();
-        this.leftOscillator.disconnect();
-      } catch (e) { /* Ignorar si ya estaba detenido */ }
+      try { this.leftOscillator.stop(); this.leftOscillator.disconnect(); } catch (e) {}
       this.leftOscillator = null;
     }
     if (this.rightOscillator) {
-      try {
-        this.rightOscillator.stop();
-        this.rightOscillator.disconnect();
-      } catch (e) {}
+      try { this.rightOscillator.stop(); this.rightOscillator.disconnect(); } catch (e) {}
       this.rightOscillator = null;
     }
-
-    // Detener naturaleza
     if (this.natureSound) {
-      try {
-        this.natureSound.stop();
-        this.natureSound.disconnect();
-      } catch (e) {}
+      try { this.natureSound.stop(); this.natureSound.disconnect(); } catch (e) {}
       this.natureSound = null;
     }
-
-    // Limpiar intervalo
     if (this.progressInterval) {
       clearInterval(this.progressInterval);
       this.progressInterval = null;
     }
-
-    // Resetear estado
-    this.isPlaying = false;
-    this.isNatureLoaded = false;
-    this.areBeatsStarted = false;
+    if (this.scanInterval) {
+      clearInterval(this.scanInterval);
+      this.scanInterval = null;
+    }
     
-    console.log('✅ Todos los nodos detenidos');
+    this.isPlaying = false;
+    this.isSchumannScan = false;
+    this.isHealingMode = false;
+    this.currentBeatFreq = null;
+    this.therapeuticFrequency = null;
   }
 
-  async pause() {
-    if (this.audioContext?.state === 'running') {
-      await this.audioContext.suspend();
-      this.isPlaying = false;
-      console.log('⏸️ Pausado');
-    }
-  }
-
-  async resume() {
-    if (this.audioContext?.state === 'suspended') {
-      await this.audioContext.resume();
-      this.isPlaying = true;
-      console.log('▶️ Reanudado');
-    }
-  }
-
-  // Controles de volumen independientes
   setBeatsVolume(value) {
-    if (this.beatsGain) {
-      this.beatsGain.gain.value = Math.max(0, Math.min(1, value));
-    }
+    if (this.beatsGain) this.beatsGain.gain.value = Math.max(0, Math.min(1, value));
   }
 
   setNatureVolume(value) {
-    if (this.natureGain) {
-      this.natureGain.gain.value = Math.max(0, Math.min(1, value));
-    }
+    if (this.natureGain) this.natureGain.gain.value = Math.max(0, Math.min(1, value));
   }
 
   setMasterVolume(value) {
-    if (this.masterGain) {
-      this.masterGain.gain.value = Math.max(0, Math.min(1, value));
-    }
+    if (this.masterGain) this.masterGain.gain.value = Math.max(0, Math.min(1, value));
+  }
+
+  getCurrentFrequency() {
+    return this.isHealingMode ? this.therapeuticFrequency : this.currentBeatFreq;
   }
 
   getFrequencyInfo() {
@@ -247,16 +295,9 @@ export class BinauralAudioEngine {
     return {
       left: this.leftOscillator.frequency.value,
       right: this.rightOscillator.frequency.value,
-      beat: Math.abs(this.rightOscillator.frequency.value - this.leftOscillator.frequency.value)
-    };
-  }
-
-  getStatus() {
-    return {
-      isPlaying: this.isPlaying,
-      isNatureLoaded: this.isNatureLoaded,
-      areBeatsStarted: this.areBeatsStarted,
-      contextState: this.audioContext?.state
+      beat: Math.abs(this.rightOscillator.frequency.value - this.leftOscillator.frequency.value),
+      isHealing: this.isHealingMode,
+      therapeuticFreq: this.therapeuticFrequency
     };
   }
 }
