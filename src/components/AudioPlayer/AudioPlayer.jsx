@@ -5,15 +5,22 @@ import './AudioPlayer.css';
 export default function AudioPlayer({ routine, onComplete, onBack }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [beatsVolume, setBeatsVolume] = useState(0.25); // Más bajo por defecto
-  const [natureVolume, setNatureVolume] = useState(0.6); // Más alto por defecto
+  const [beatsVolume, setBeatsVolume] = useState(0.25);
+  const [natureVolume, setNatureVolume] = useState(0.6);
   const [timeRemaining, setTimeRemaining] = useState(routine?.duration || 300);
+  const [currentSchumannFreq, setCurrentSchumannFreq] = useState(routine.beatFreq);
 
   useEffect(() => {
     audioEngine.onProgress = (prog) => {
       setProgress(prog);
       const remaining = Math.max(0, routine.duration - Math.floor(prog * routine.duration));
       setTimeRemaining(remaining);
+      
+      // Actualizar frecuencia si es modo scan
+      if (routine.isSchumann && routine.schumannMode === 'scan') {
+        const freq = audioEngine.getCurrentFrequency?.() || routine.beatFreq;
+        setCurrentSchumannFreq(freq);
+      }
     };
 
     audioEngine.onComplete = () => {
@@ -22,10 +29,7 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
       onComplete?.();
     };
 
-    return () => {
-      audioEngine.stop();
-      console.log("🔍 Estado tras stop:", audioEngine.getStatus());
-    };
+    return () => audioEngine.stop();
   }, [routine, onComplete]);
 
   const handlePlayPause = async () => {
@@ -41,9 +45,11 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
         carrierFreq: routine.carrierFreq,
         beatFreq: routine.beatFreq,
         natureSoundUrl: routine.natureSound,
-        duration: routine.duration
+        duration: routine.duration,
+        isSchumann: routine.isSchumann,
+        schumannMode: routine.schumannMode,
+        scanSequence: routine.scanSequence
       });
-      // Aplicar volúmenes iniciales
       audioEngine.setBeatsVolume(beatsVolume);
       audioEngine.setNatureVolume(natureVolume);
       setIsPlaying(true);
@@ -52,7 +58,6 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
 
   const handleStop = () => {
     audioEngine.stop();
-      console.log("🔍 Estado tras stop:", audioEngine.getStatus());
     setIsPlaying(false);
     setProgress(0);
     setTimeRemaining(routine.duration);
@@ -76,36 +81,81 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Badge especial para Schumann
+  const renderSchumannBadge = () => {
+    if (!routine.isSchumann) return null;
+    
+    const modeLabels = {
+      fundamental: 'Fundamental 7.83 Hz',
+      harmonic: `${routine.harmonicOrder}º Armónico`,
+      scan: 'Escaneo Armónico'
+    };
+    
+    return (
+      <div className="schumann-badge">
+        <span className="earth-icon">🌍</span>
+        <span className="mode-label">{modeLabels[routine.schumannMode]}</span>
+        {routine.schumannMode === 'scan' && (
+          <span className="scan-indicator">
+            {currentSchumannFreq?.toFixed(2)} Hz
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="audio-player-container">
       <div className="player-header">
         <button className="back-button" onClick={onBack}>← Volver</button>
-        <div className="session-badge">
-          {routine.icon} {routine.name}
-        </div>
+        {renderSchumannBadge()}
+        {!routine.isSchumann && (
+          <div className="session-badge">{routine.icon} {routine.name}</div>
+        )}
       </div>
 
-      <div className="visualizer-wrapper">
+      {/* Visualizador con estilo Schumann */}
+      <div className={`visualizer-wrapper ${routine.isSchumann ? 'schumann-mode' : ''}`}>
         <div className="visualizer">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(7)].map((_, i) => (
             <div
               key={i}
               className={`visualizer-bar ${isPlaying ? 'active' : ''}`}
-              style={{ animationDelay: `${i * 0.1}s` }}
+              style={{ 
+                animationDelay: `${i * 0.08}s`,
+                background: routine.isSchumann 
+                  ? `hsl(${200 + i * 20}, 70%, 50%)` 
+                  : 'linear-gradient(180deg, #6366f1, #8b5cf6)'
+              }}
             />
           ))}
         </div>
+        {routine.isSchumann && (
+          <div className="schumann-wave-label">
+            Resonancia Terrestre • {currentSchumannFreq?.toFixed(2) || routine.beatFreq} Hz
+          </div>
+        )}
       </div>
 
       <div className="session-info">
-        <div className="info-card primary">
+        <div className={`info-card primary ${routine.isSchumann ? 'schumann' : ''}`}>
           <span className="info-label">Frecuencia</span>
-          <span className="info-value">{routine.beatFreq} Hz ({routine.band})</span>
+          <span className="info-value">
+            {routine.isSchumann 
+              ? `🌍 ${currentSchumannFreq?.toFixed(2) || routine.beatFreq} Hz` 
+              : `${routine.beatFreq} Hz (${routine.band})`}
+          </span>
         </div>
         <div className="info-card secondary">
           <span className="info-label">Sonido de fondo</span>
           <span className="info-value">{routine.natureSoundName}</span>
         </div>
+        {routine.isSchumann && (
+          <div className="info-card tertiary schumann-info">
+            <span className="info-label">Beneficios Schumann</span>
+            <span className="info-value">{routine.benefits?.[0]}</span>
+          </div>
+        )}
       </div>
 
       <div className="progress-section">
@@ -121,38 +171,22 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
       <div className="controls-main">
         <button className="control-btn stop" onClick={handleStop}>⏹️</button>
         <button 
-          className={`control-btn play ${isPlaying ? 'playing' : ''}`} 
+          className={`control-btn play ${isPlaying ? 'playing' : ''} ${routine.isSchumann ? 'schumann-play' : ''}`} 
           onClick={handlePlayPause}
         >
           {isPlaying ? '⏸️' : progress === 1 ? '🔄' : '▶️'}
         </button>
       </div>
 
-      {/* Controles de volumen SEPARADOS */}
       <div className="volume-controls">
         <div className="volume-slider">
-          <label>🎧 Beats Binaurales</label>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={beatsVolume}
-            onChange={handleBeatsVolumeChange}
-          />
+          <label>🎧 Beats</label>
+          <input type="range" min="0" max="1" step="0.05" value={beatsVolume} onChange={handleBeatsVolumeChange} />
           <span className="volume-value">{Math.round(beatsVolume * 100)}%</span>
         </div>
-        
         <div className="volume-slider">
-          <label>🎵 Sonido de Naturaleza</label>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={natureVolume}
-            onChange={handleNatureVolumeChange}
-          />
+          <label>🎵 Naturaleza</label>
+          <input type="range" min="0" max="1" step="0.05" value={natureVolume} onChange={handleNatureVolumeChange} />
           <span className="volume-value">{Math.round(natureVolume * 100)}%</span>
         </div>
       </div>
@@ -165,19 +199,13 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
         </div>
       </div>
 
-      {/* Debug info */}
-      <div className="debug-info" style={{
-        background: 'rgba(99, 102, 241, 0.1)',
-        padding: '1rem',
-        borderRadius: '8px',
-        fontSize: '0.8rem',
-        fontFamily: 'monospace'
-      }}>
-        <p><strong>Configuración:</strong></p>
-        <p>Beats: {routine.beatFreq} Hz | Portadora: {routine.carrierFreq} Hz</p>
-        <p>Sonido: {routine.natureSound || 'Ninguno'}</p>
-        <p>Abre Console (F12) para ver logs detallados</p>
-      </div>
+      {routine.isSchumann && (
+        <div className="schumann-info-box">
+          <h4>🌍 Sobre la Resonancia Schumann</h4>
+          <p>La frecuencia fundamental de 7.83 Hz es la resonancia electromagnética natural de la cavidad Tierra-ionosfera. Estudios sugieren que la exposición a esta frecuencia puede apoyar la sincronización de ritmos biológicos.</p>
+          <p className="schumann-note"><em>Nota: Este producto no es un dispositivo médico.</em></p>
+        </div>
+      )}
     </div>
   );
 }

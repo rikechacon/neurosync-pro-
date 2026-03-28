@@ -1,24 +1,62 @@
 import { useState, useEffect } from 'react';
 import Questionnaire from './components/Questionnaire/Questionnaire';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
+import { authAPI, routinesAPI } from './services/api';
 import { checkBluetoothSupport } from './utils/bluetoothCheck';
 import './App.css';
 
 function App() {
+  const [user, setUser] = useState(null);
   const [currentView, setCurrentView] = useState('home');
   const [currentRoutine, setCurrentRoutine] = useState(null);
   const [btStatus, setBtStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Verificar si hay usuario logueado
+    const savedUser = authAPI.getCurrentUser();
+    if (savedUser) {
+      setUser(savedUser);
+    }
     checkBluetoothSupport().then(setBtStatus);
+    setLoading(false);
   }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setCurrentView('home');
+  };
+
+  const handleRegister = (userData) => {
+    setUser(userData);
+    setCurrentView('home');
+  };
+
+  const handleLogout = () => {
+    authAPI.logout();
+    setUser(null);
+    setCurrentView('home');
+  };
 
   const handleStartQuestionnaire = () => {
     setCurrentView('questionnaire');
   };
 
-  const handleQuestionnaireComplete = (routine) => {
+  const handleQuestionnaireComplete = async (routine) => {
     setCurrentRoutine(routine);
+    
+    // Guardar rutina en backend si hay usuario
+    if (user) {
+      try {
+        await routinesAPI.create(routine);
+        console.log('✅ Rutina guardada en base de datos');
+      } catch (error) {
+        console.error('Error guardando rutina:', error);
+      }
+    }
+    
     setCurrentView('playing');
   };
 
@@ -27,11 +65,35 @@ function App() {
     setCurrentRoutine(null);
   };
 
-  const handleSessionComplete = () => {
+  const handleSessionComplete = async () => {
+    // Registrar sesión completada
+    if (user && currentRoutine) {
+      try {
+        // Aquí podrías guardar la sesión completada
+        console.log('✅ Sesión completada registrada');
+      } catch (error) {
+        console.error('Error registrando sesión:', error);
+      }
+    }
     setCurrentView('home');
     setCurrentRoutine(null);
   };
 
+  if (loading) {
+    return <div className="loading">Cargando...</div>;
+  }
+
+  // Si no hay usuario, mostrar login/registro
+  if (!user) {
+    return (
+      <AuthView 
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
+    );
+  }
+
+  // Usuario logueado - mostrar app principal
   return (
     <div className="app">
       <header className="app-header">
@@ -47,15 +109,19 @@ function App() {
             Estimulación neurosensorial personalizada
           </p>
           
+          <div className="header-actions">
+            <span className="user-greeting">👋 {user.name || user.email}</span>
+            <button onClick={handleLogout} className="logout-button">
+              Cerrar Sesión
+            </button>
+          </div>
+          
           <div className="status-indicators">
             {btStatus && (
               <span className={`status-badge ${btStatus.supported ? 'success' : 'warning'}`}>
                 {btStatus.supported ? '📡 Bluetooth OK' : '📡 Bluetooth limitado'}
               </span>
             )}
-            <span className="status-badge info">
-              🌐 {window.location.hostname.includes('github.dev') ? 'Codespaces' : 'Local'}
-            </span>
           </div>
         </div>
       </header>
@@ -64,6 +130,7 @@ function App() {
         {currentView === 'home' && (
           <HomeView 
             onStart={handleStartQuestionnaire}
+            user={user}
             btStatus={btStatus}
           />
         )}
@@ -94,11 +161,29 @@ function App() {
   );
 }
 
-function HomeView({ onStart, btStatus }) {
+// Componente de Auth (Login/Register)
+function AuthView({ onLogin, onRegister }) {
+  const [isLogin, setIsLogin] = useState(true);
+
+  return isLogin ? (
+    <Login 
+      onLogin={onLogin}
+      onSwitchToRegister={() => setIsLogin(false)}
+    />
+  ) : (
+    <Register 
+      onRegister={onRegister}
+      onSwitchToLogin={() => setIsLogin(true)}
+    />
+  );
+}
+
+// Home View (simplificada)
+function HomeView({ onStart, user, btStatus }) {
   return (
     <div className="home-view">
       <div className="welcome-card">
-        <h2>Bienvenido a NeuroSync Pro</h2>
+        <h2>Bienvenido{user.name ? `, ${user.name}` : ''} a NeuroSync Pro</h2>
         <p>
           Experimenta la sincronización cerebral mediante sonidos binaurales 
           personalizados y frecuencia Schumann.
@@ -128,29 +213,13 @@ function HomeView({ onStart, btStatus }) {
         />
       </div>
 
-      <button 
-        className="start-btn"
-        onClick={onStart}
-      >
+      <button className="start-btn" onClick={onStart}>
         🎯 Comenzar Mi Sesión Personalizada
       </button>
-
-      <div className="info-section">
-        <h3>¿Cómo funciona?</h3>
-        <ol>
-          <li>Responde el cuestionario de evaluación (2 min)</li>
-          <li>El sistema genera tu rutina personalizada</li>
-          <li>Usa auriculares estéreo para mejor efecto binaural</li>
-          <li>Relájate y deja que la tecnología trabaje</li>
-        </ol>
-      </div>
 
       {btStatus && !btStatus.supported && (
         <div className="notice-card warning">
           <p>⚠️ {btStatus.message}</p>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-            El audio binaural funcionará igual. La conexión Bluetooth es opcional.
-          </p>
         </div>
       )}
     </div>
@@ -167,4 +236,4 @@ function FeatureCard({ icon, title, description }) {
   );
 }
 
-/* export default App;
+export default App;

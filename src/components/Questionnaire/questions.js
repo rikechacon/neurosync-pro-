@@ -90,8 +90,8 @@ export const questions = [
       { value: 'balance_528', label: '⚖️ Equilibrio Total (528 Hz)', description: 'Armonización completa del cuerpo', category: 'balance', featured: true }
     ],
     hint: 'Estas frecuencias están basadas en investigaciones de terapia de frecuencia',
-    required: false, // Solo required si goal === 'healing'
-    order: 3.5 // Entre pregunta 3 y 4
+    required: false,
+    order: 3.5
   },
   {
     id: 'nature_preference',

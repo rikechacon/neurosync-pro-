@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { getOrderedQuestions, validateAnswers, getQuestionProgress } from './questions';
 import { mapAnswersToRoutine } from '../../utils/frequencyMapper';
 import './Questionnaire.css';
@@ -6,50 +6,32 @@ import './Questionnaire.css';
 export default function Questionnaire({ onComplete, onBack }) {
   const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
-  const [showHealingSubquestion, setShowHealingSubquestion] = useState(false);
 
-  // Obtener preguntas base
+  // Obtener todas las preguntas base
   const allQuestions = useMemo(() => getOrderedQuestions(), []);
 
-  // Filtrar preguntas visibles según respuestas
+  // Calcular preguntas visibles basadas en respuestas
   const visibleQuestions = useMemo(() => {
     return allQuestions.filter(q => {
-      // Si es pregunta condicional, verificar condición
       if (q.conditional?.showIf) {
         const { goal, value } = q.conditional.showIf;
         return answers[goal] === value;
       }
-      return true; // Preguntas normales siempre visibles
+      return true;
     });
   }, [allQuestions, answers]);
 
-  // Calcular índice actual basado en preguntas visibles
-  const [visibleIndex, setVisibleIndex] = useState(0);
-  const currentQuestion = visibleQuestions[visibleIndex];
-  const totalVisible = visibleQuestions.length;
-  const progress = getQuestionProgress(visibleIndex, totalVisible);
+  // Estado para índice actual
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  // Efecto: Mostrar sub-pregunta de sanación si aplica
-  useEffect(() => {
-    if (answers.goal === 'healing') {
-      setShowHealingSubquestion(true);
-    } else {
-      setShowHealingSubquestion(false);
-      // Limpiar respuesta de healing_type si cambió de opinión
-      if (answers.healing_type) {
-        setAnswers(prev => {
-          const newAnswers = { ...prev };
-          delete newAnswers.healing_type;
-          return newAnswers;
-        });
-      }
-    }
-  }, [answers.goal]);
+  // Ajustar índice si excede el número de preguntas
+  const safeIndex = Math.min(currentQuestionIndex, Math.max(0, visibleQuestions.length - 1));
+  const currentQuestion = visibleQuestions[safeIndex];
 
-  // Efecto: Resetear índice si cambian las preguntas visibles
-  useEffect(() => {
-    setVisibleIndex(0);
-  }, [visibleQuestions.length]);
+  // Calcular progreso
+  const progress = visibleQuestions.length > 0 
+    ? getQuestionProgress(safeIndex, visibleQuestions.length)
+    : 0;
 
   // Manejar respuesta de tipo escala
   const handleScaleAnswer = (questionId, value) => {
@@ -61,33 +43,18 @@ export default function Questionnaire({ onComplete, onBack }) {
   const handleSingleAnswer = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
     setErrors(prev => ({ ...prev, [questionId]: null }));
-
-    // Si es la pregunta goal y selecciona healing, mostrar sub-pregunta
-    if (questionId === 'goal' && value === 'healing') {
-      setShowHealingSubquestion(true);
-    }
-
-    // Avanzar automáticamente con animación (solo si no es pregunta condicional pendiente)
-    const question = visibleQuestions.find(q => q.id === questionId);
-    if (question && !question.conditional) {
-      setTimeout(() => {
-        if (visibleIndex < totalVisible - 1) {
-          setVisibleIndex(prev => prev + 1);
-        }
-      }, 250);
-    }
   };
 
   // Navegación manual
   const handleNext = () => {
-    if (visibleIndex < totalVisible - 1) {
-      setVisibleIndex(prev => prev + 1);
+    if (safeIndex < visibleQuestions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
   const handlePrevious = () => {
-    if (visibleIndex > 0) {
-      setVisibleIndex(prev => prev - 1);
+    if (safeIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
     }
   };
 
@@ -97,8 +64,6 @@ export default function Questionnaire({ onComplete, onBack }) {
     
     if (!validation.valid) {
       setErrors({ submit: validation.message });
-      const errorElement = document.querySelector('.error-message');
-      errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -108,23 +73,28 @@ export default function Questionnaire({ onComplete, onBack }) {
 
   // Renderizar input según tipo
   const renderQuestionInput = (question) => {
+    if (!question) return null;
+
     if (question.type === 'scale') {
+      const value = answers[question.id] ?? question.min;
+      const percentage = ((value - question.min) / (question.max - question.min)) * 100;
+      
       return (
         <div className="scale-input-container">
           <input
             type="range"
             min={question.min}
             max={question.max}
-            value={answers[question.id] || question.min}
+            value={value}
             onChange={(e) => handleScaleAnswer(question.id, e.target.value)}
             className="scale-slider"
             style={{
-              background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${((answers[question.id] || question.min) - question.min) / (question.max - question.min) * 100}%, rgba(255,255,255,0.1) ${((answers[question.id] || question.min) - question.min) / (question.max - question.min) * 100}%, rgba(255,255,255,0.1) 100%)`
+              background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${percentage}%, rgba(255,255,255,0.1) ${percentage}%, rgba(255,255,255,0.1) 100%)`
             }}
           />
           <div className="scale-labels">
             <span className="scale-min">{question.labels[question.min]}</span>
-            <span className="scale-value">{answers[question.id] || question.min}</span>
+            <span className="scale-value">{value}</span>
             <span className="scale-max">{question.labels[question.max]}</span>
           </div>
         </div>
@@ -132,7 +102,6 @@ export default function Questionnaire({ onComplete, onBack }) {
     }
 
     if (question.type === 'single') {
-      // Agrupar opciones por categoría si existen
       const optionsByCategory = question.options.reduce((acc, opt) => {
         const cat = opt.category || 'general';
         if (!acc[cat]) acc[cat] = [];
@@ -151,12 +120,11 @@ export default function Questionnaire({ onComplete, onBack }) {
                 {options.map(option => {
                   const isSelected = answers[question.id] === option.value;
                   const isFeatured = option.featured;
-                  const isHealingOption = question.id === 'goal' && option.isHealing;
                   
                   return (
                     <button
                       key={option.value}
-                      className={`option-card ${isSelected ? 'selected' : ''} ${isFeatured ? 'featured' : ''} ${isHealingOption ? 'healing-trigger' : ''}`}
+                      className={`option-card ${isSelected ? 'selected' : ''} ${isFeatured ? 'featured' : ''}`}
                       onClick={() => handleSingleAnswer(question.id, option.value)}
                       type="button"
                     >
@@ -181,7 +149,6 @@ export default function Questionnaire({ onComplete, onBack }) {
     return null;
   };
 
-  // Label para categorías de sanación
   const getCategoryLabel = (category) => {
     const labels = {
       neurological: '🧠 Neurológico / Cognitivo',
@@ -199,6 +166,10 @@ export default function Questionnaire({ onComplete, onBack }) {
     return labels[category] || category;
   };
 
+  if (!currentQuestion) {
+    return <div className="loading">Cargando cuestionario...</div>;
+  }
+
   return (
     <div className="questionnaire-wrapper">
       {/* Header con progreso */}
@@ -213,24 +184,22 @@ export default function Questionnaire({ onComplete, onBack }) {
           <span className="progress-text">{progress}% Completado</span>
         </div>
         <div className="step-counter">
-          Paso {visibleIndex + 1} de {totalVisible}
+          Paso {safeIndex + 1} de {visibleQuestions.length}
         </div>
       </div>
 
       {/* Tarjeta de pregunta */}
       <div className="question-card">
         <div className="question-content">
-          <h2 className="question-text">{currentQuestion?.text}</h2>
+          <h2 className="question-text">{currentQuestion.text}</h2>
           
-          {currentQuestion?.hint && (
+          {currentQuestion.hint && (
             <p className="question-hint">💡 {currentQuestion.hint}</p>
           )}
           
-          {currentQuestion && (
-            <div className="question-input">
-              {renderQuestionInput(currentQuestion)}
-            </div>
-          )}
+          <div className="question-input">
+            {renderQuestionInput(currentQuestion)}
+          </div>
         </div>
       </div>
 
@@ -240,25 +209,20 @@ export default function Questionnaire({ onComplete, onBack }) {
           ⚠️ {errors.submit}
         </div>
       )}
-      {errors[currentQuestion?.id] && (
-        <div className="error-message" role="alert">
-          ⚠️ {errors[currentQuestion.id]}
-        </div>
-      )}
 
       {/* Navegación */}
       <div className="navigation-buttons">
-        {visibleIndex > 0 && (
+        {safeIndex > 0 && (
           <button className="nav-btn secondary" onClick={handlePrevious} type="button">
             ← Anterior
           </button>
         )}
         
-        {visibleIndex < totalVisible - 1 ? (
+        {safeIndex < visibleQuestions.length - 1 ? (
           <button 
             className="nav-btn primary" 
             onClick={handleNext}
-            disabled={answers[currentQuestion?.id] === undefined}
+            disabled={answers[currentQuestion.id] === undefined || answers[currentQuestion.id] === null}
             type="button"
           >
             Siguiente →
@@ -273,12 +237,10 @@ export default function Questionnaire({ onComplete, onBack }) {
       {/* Info de sanación */}
       {answers.goal === 'healing' && (
         <div className="healing-info-box">
-          <p><strong>💚 Modo Sanación:</strong> Las frecuencias terapéuticas se combinan con beats binaurales para potenciar sus efectos. Se recomienda usar auriculares y un ambiente tranquilo.</p>
-          <p className="disclaimer"><em>Nota: Estas frecuencias son complementarias y no sustituyen tratamiento médico profesional.</em></p>
+          <p><strong>💚 Modo Sanación:</strong> Las frecuencias terapéuticas se combinan con beats binaurales.</p>
         </div>
       )}
 
-      {/* Nota de privacidad */}
       <p className="privacy-note">
         Tus respuestas se procesan localmente. No se comparten con terceros.
       </p>

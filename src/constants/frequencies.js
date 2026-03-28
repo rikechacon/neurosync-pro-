@@ -13,53 +13,88 @@ export const BRAINWAVE_BANDS = {
 
 export const SCHUMANN_RESONANCE = {
   fundamental: 7.83,
-  harmonics: [14.3, 20.8, 27.3, 33.8, 39.5],
+  harmonics: [14.3, 20.8, 27.3, 33.8, 39.5, 45.0],
   description: 'Resonancia electromagnética natural de la Tierra',
   benefits: [
     'Sincronización del ritmo circadiano',
     'Reducción del estrés y ansiedad',
     'Equilibrio del sistema nervioso',
-    'Mejora de la calidad del sueño'
+    'Mejora de la calidad del sueño',
+    'Conexión con ritmos naturales'
   ]
 };
 
 export const FREQUENCY_PRESETS = {
-  // Schumann presets
-  schumann_fundamental: {
-    id: 'schumann_fundamental',
-    name: 'Schumann Fundamental',
+  // === MODO SCHUMANN PURO ===
+  schumann_pure: {
+    id: 'schumann_pure',
+    name: '🌍 Schumann Puro',
     carrier: 200,
     beat: 7.83,
     band: 'theta',
     icon: '🌍',
-    description: 'Resonancia base de la Tierra (7.83 Hz)',
-    benefits: ['Equilibrio general', 'Conexión natural', 'Bienestar']
+    description: 'Resonancia fundamental de la Tierra (7.83 Hz) sin modulación',
+    benefits: ['Equilibrio natural', 'Sincronización circadiana', 'Conexión tierra'],
+    isSchumann: true,
+    schumannMode: 'fundamental'
   },
   schumann_harmonic_1: {
     id: 'schumann_harmonic_1',
-    name: 'Schumann 1er Armónico',
+    name: '🌍 Schumann 1er Armónico',
     carrier: 200,
     beat: 14.3,
     band: 'alpha',
     icon: '🌍',
-    description: 'Primer armónico Schumann (14.3 Hz)',
-    benefits: ['Relajación activa', 'Claridad mental']
+    description: 'Primer armónico Schumann (14.3 Hz) - Claridad mental',
+    benefits: ['Enfoque suave', 'Creatividad', 'Equilibrio emocional'],
+    isSchumann: true,
+    schumannMode: 'harmonic',
+    harmonicOrder: 1
   },
   schumann_harmonic_2: {
     id: 'schumann_harmonic_2',
-    name: 'Schumann 2do Armónico',
+    name: '🌍 Schumann 2do Armónico',
     carrier: 200,
     beat: 20.8,
     band: 'beta',
     icon: '🌍',
-    description: 'Segundo armónico Schumann (20.8 Hz)',
-    benefits: ['Energía mental', 'Concentración']
+    description: 'Segundo armónico Schumann (20.8 Hz) - Energía natural',
+    benefits: ['Vitalidad', 'Concentración', 'Despertar suave'],
+    isSchumann: true,
+    schumannMode: 'harmonic',
+    harmonicOrder: 2
+  },
+  schumann_harmonic_3: {
+    id: 'schumann_harmonic_3',
+    name: '🌍 Schumann 3er Armónico',
+    carrier: 200,
+    beat: 27.3,
+    band: 'beta',
+    icon: '🌍',
+    description: 'Tercer armónico Schumann (27.3 Hz) - Procesamiento cognitivo',
+    benefits: ['Agilidad mental', 'Memoria', 'Procesamiento rápido'],
+    isSchumann: true,
+    schumannMode: 'harmonic',
+    harmonicOrder: 3
+  },
+  schumann_scan: {
+    id: 'schumann_scan',
+    name: '🌍 Schumann Escaneo',
+    carrier: 200,
+    beat: 7.83,
+    band: 'theta',
+    icon: '🔄',
+    description: 'Ciclo suave entre fundamental y armónicos Schumann',
+    benefits: ['Exploración completa', 'Adaptación natural', 'Equilibrio dinámico'],
+    isSchumann: true,
+    schumannMode: 'scan',
+    scanSequence: [7.83, 14.3, 20.8, 27.3, 20.8, 14.3, 7.83]
   },
   
-  // Brainwave presets
+  // === Brainwave presets estándar ===
   relax: {
     id: 'relax',
-    name: 'Relajación Profunda',
+    name: '🧘 Relajación Profunda',
     carrier: 400,
     beat: 6,
     band: 'theta',
@@ -69,7 +104,7 @@ export const FREQUENCY_PRESETS = {
   },
   focus: {
     id: 'focus',
-    name: 'Concentración',
+    name: '🎯 Concentración',
     carrier: 400,
     beat: 12,
     band: 'alpha',
@@ -79,7 +114,7 @@ export const FREQUENCY_PRESETS = {
   },
   sleep: {
     id: 'sleep',
-    name: 'Sueño Profundo',
+    name: '😴 Sueño Profundo',
     carrier: 400,
     beat: 3,
     band: 'delta',
@@ -89,7 +124,7 @@ export const FREQUENCY_PRESETS = {
   },
   energy: {
     id: 'energy',
-    name: 'Energía Mental',
+    name: '⚡ Energía Mental',
     carrier: 400,
     beat: 20,
     band: 'beta',
@@ -99,7 +134,7 @@ export const FREQUENCY_PRESETS = {
   },
   anxiety: {
     id: 'anxiety',
-    name: 'Calma Anti-Ansiedad',
+    name: '🕊️ Calma Anti-Ansiedad',
     carrier: 400,
     beat: 8,
     band: 'alpha',
@@ -109,7 +144,7 @@ export const FREQUENCY_PRESETS = {
   },
   meditation: {
     id: 'meditation',
-    name: 'Meditación Profunda',
+    name: '🧘‍♂️ Meditación Profunda',
     carrier: 400,
     beat: 4,
     band: 'theta',
@@ -120,42 +155,12 @@ export const FREQUENCY_PRESETS = {
 };
 
 export const NATURE_SOUNDS = {
-  rain: {
-    id: 'rain',
-    name: '🌧️ Lluvia Ligera',
-    url: '/sounds/rain.mp3',
-    description: 'Sonido relajante de lluvia suave'
-  },
-  ocean: {
-    id: 'ocean',
-    name: '🌊 Olas del Mar',
-    url: '/sounds/ocean.mp3',
-    description: 'Olas rompiendo en la playa'
-  },
-  stream: {
-    id: 'stream',
-    name: '🏞️ Arroyo',
-    url: '/sounds/stream.mp3',
-    description: 'Agua fluyendo en arroyo de montaña'
-  },
-  birds: {
-    id: 'birds',
-    name: '🐦 Pájaros',
-    url: '/sounds/birds.mp3',
-    description: 'Canto de pájaros matutino'
-  },
-  crickets: {
-    id: 'crickets',
-    name: '🦗 Grillos y Ranas',
-    url: '/sounds/crickets.mp3',
-    description: 'Sonidos nocturnos de naturaleza'
-  },
-  none: {
-    id: 'none',
-    name: '🔇 Solo Beat',
-    url: null,
-    description: 'Sin sonido de fondo'
-  }
+  rain: { id: 'rain', name: '🌧️ Lluvia', url: '/sounds/rain.mp3', description: 'Sonido relajante de lluvia' },
+  ocean: { id: 'ocean', name: '🌊 Olas del Mar', url: '/sounds/ocean.mp3', description: 'Olas rompiendo en la playa' },
+  stream: { id: 'stream', name: '🏞️ Arroyo', url: '/sounds/stream.mp3', description: 'Agua fluyendo' },
+  birds: { id: 'birds', name: '🐦 Pájaros', url: '/sounds/birds.mp3', description: 'Canto de aves' },
+  crickets: { id: 'crickets', name: '🦗 Bosque Nocturno', url: '/sounds/crickets.mp3', description: 'Sonidos nocturnos' },
+  none: { id: 'none', name: '🔇 Solo Beat', url: null, description: 'Sin sonido de fondo' }
 };
 
 export const SESSION_DURATION = {
@@ -164,8 +169,9 @@ export const SESSION_DURATION = {
   long: { id: 'long', minutes: 30, seconds: 1800, label: '30 min - Profundo' }
 };
 
-// Helpers de exportación
+// Helpers
 export const getAllPresets = () => Object.values(FREQUENCY_PRESETS);
 export const getPresetById = (id) => FREQUENCY_PRESETS[id] || null;
 export const getNatureSounds = () => Object.values(NATURE_SOUNDS);
-export const getBrainwaveBands = () => Object.entries(BRAINWAVE_BANDS);
+export const getSchumannPresets = () => Object.values(FREQUENCY_PRESETS).filter(p => p.isSchumann);
+export const getBrainwavePresets = () => Object.values(FREQUENCY_PRESETS).filter(p => !p.isSchumann);

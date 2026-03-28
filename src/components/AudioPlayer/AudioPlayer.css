@@ -310,3 +310,119 @@
     min-width: auto;
   }
 }
+
+/* === Estilos para Modo Schumann === */
+.schumann-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+  animation: pulse-schumann 3s ease-in-out infinite;
+}
+
+.earth-icon {
+  font-size: 1.2rem;
+  animation: rotate-earth 10s linear infinite;
+}
+
+@keyframes rotate-earth {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-schumann {
+  0%, 100% { box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); }
+  50% { box-shadow: 0 4px 25px rgba(34, 211, 238, 0.7); }
+}
+
+.mode-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.scan-indicator {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.visualizer-wrapper.schumann-mode {
+  padding: 2.5rem 0;
+}
+
+.visualizer-wrapper.schumann-mode .visualizer-bar {
+  width: 14px;
+  border-radius: 7px;
+}
+
+.schumann-wave-label {
+  text-align: center;
+  color: #67e8f9;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.info-card.schumann {
+  border-left-color: #0ea5e9;
+  background: rgba(14, 165, 233, 0.1);
+}
+
+.info-card.schumann-info {
+  border-left-color: #22d3ee;
+}
+
+.control-btn.play.schumann-play {
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.5);
+}
+
+.control-btn.play.schumann-play:hover {
+  box-shadow: 0 6px 25px rgba(34, 211, 238, 0.7);
+}
+
+.control-btn.play.schumann-play.playing {
+  animation: pulse-schumann 2s infinite;
+}
+
+.schumann-info-box {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(34, 211, 238, 0.1));
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.schumann-info-box h4 {
+  margin: 0 0 0.75rem;
+  color: #67e8f9;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.schumann-info-box p {
+  margin: 0.5rem 0;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.schumann-note {
+  font-style: italic;
+  color: #666 !important;
+  font-size: 0.8rem;
+  margin-top: 1rem !important;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
