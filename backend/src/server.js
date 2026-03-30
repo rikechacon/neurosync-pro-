@@ -12,41 +12,20 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration - Allow multiple origins
-const allowedOrigins = process.env.FRONTEND_URL 
-  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-  : ['http://localhost:5173', 'https://localhost:5173'];
-
-console.log('🔐 CORS allowed origins:', allowedOrigins);
-
+// CORS PERMISIVO - Allow all origins
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow all origins in development
-    if (process.env.NODE_ENV === 'development' || allowedOrigins.includes('*')) {
-      return callback(null, true);
-    }
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.error('❌ CORS blocked:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',  // Allow ALL origins (for development)
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging
+// Logging
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('origin')}`);
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('origin') || 'no-origin'}`);
   next();
 });
 
@@ -63,60 +42,48 @@ app.get('/health', async (req, res) => {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       database: 'connected',
-      cors: {
-        allowedOrigins: allowedOrigins,
-        origin: req.get('origin')
-      }
+      cors: 'enabled (allow all origins)',
+      origin: req.get('origin')
     });
   } catch (error) {
-    res.status(503).json({ 
-      status: 'unhealthy',
-      error: error.message 
-    });
+    res.status(503).json({ status: 'unhealthy', error: error.message });
   }
 });
 
-// Root endpoint
+// Root
 app.get('/', (req, res) => {
   res.json({
     name: 'NeuroSync Pro API',
     version: '1.0.0',
+    message: 'CORS: Allow all origins',
     endpoints: {
       auth: '/api/auth',
       routines: '/api/routines',
       stats: '/api/stats',
       health: '/health'
-    },
-    cors: {
-      allowedOrigins: allowedOrigins
     }
   });
 });
 
-// 404 handler
+// 404
 app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
+  res.status(404).json({ error: 'Not found' });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ 
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
   console.log(`
-╔═══════════════════════════════════════════════╗
-║     🧠 NeuroSync Pro API Server              ║
-╠═══════════════════════════════════════════════╣
-║  🚀 Server running on port ${PORT}              ║
-║  📡 Environment: ${process.env.NODE_ENV || 'development'}                      ║
-║  🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}           ║
-║  🔐 CORS: ${allowedOrigins.join(', ')}  ║
-╚═══════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║  🧠 NeuroSync Pro API                  ║
+║  🚀 Port: ${PORT}                       ║
+║  🔐 CORS: ALLOW ALL ORIGINS (*)        ║
+║  🗄️  DB: ${process.env.DATABASE_URL ? 'Connected' : 'Not set'}  ║
+╚════════════════════════════════════════╝
   `);
 });
 
