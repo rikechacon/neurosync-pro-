@@ -1,0 +1,100 @@
+.frequency-visualizer-container {
+  background: rgba(22, 33, 62, 0.6);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  backdrop-filter: blur(10px);
+}
+
+.visualizer-canvas-wrapper {
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.frequency-canvas {
+  width: 100%;
+  height: 100px;
+  display: block;
+}
+
+.frequency-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.freq-box {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.freq-box:hover {
+  background: rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.freq-box.beat {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.freq-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.freq-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  font-family: 'Courier New', monospace;
+}
+
+.freq-box.beat .freq-value {
+  color: #8b5cf6;
+  font-size: 1.8rem;
+}
+
+.freq-info {
+  text-align: center;
+}
+
+.info-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e8e8e8;
+}
+
+@media (max-width: 640px) {
+  .frequency-numbers {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .freq-value {
+    font-size: 1.2rem;
+  }
+  
+  .freq-box.beat .freq-value {
+    font-size: 1.5rem;
+  }
+}

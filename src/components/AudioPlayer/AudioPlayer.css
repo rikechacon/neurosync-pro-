@@ -426,3 +426,103 @@
   padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Frecuencias simplificadas */
+.frequency-display-simple {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: rgba(22, 33, 62, 0.6);
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.freq-info-box {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.freq-info-box.beat {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.freq-label {
+  font-size: 0.85rem;
+  color: #a0a0a0;
+}
+
+.freq-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  font-family: 'Courier New', monospace;
+}
+
+.freq-info-box.beat .freq-value {
+  color: #8b5cf6;
+  font-size: 1.8rem;
+}
+
+.band-badge {
+  grid-column: 1 / -1;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  color: #e8e8e8;
+  text-transform: capitalize;
+}
+
+/* Error box */
+.error-box {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  color: #ef4444;
+}
+
+.error-box h3 {
+  margin-bottom: 1rem;
+}
+
+.error-box button {
+  margin-top: 1rem;
+  padding: 0.75rem 2rem;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.healing-notice {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.1));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-left: 4px solid #10b981;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.notice-icon {
+  font-size: 1.5rem;
+}
+
+.healing-notice p {
+  margin: 0;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+}

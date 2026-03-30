@@ -6,11 +6,11 @@ import './Questionnaire.css';
 export default function Questionnaire({ onComplete, onBack }) {
   const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  // Obtener todas las preguntas base
   const allQuestions = useMemo(() => getOrderedQuestions(), []);
 
-  // Calcular preguntas visibles basadas en respuestas
+  // Calcular preguntas visibles SIN useEffect
   const visibleQuestions = useMemo(() => {
     return allQuestions.filter(q => {
       if (q.conditional?.showIf) {
@@ -19,59 +19,46 @@ export default function Questionnaire({ onComplete, onBack }) {
       }
       return true;
     });
-  }, [allQuestions, answers]);
+  }, [allQuestions, answers.goal]);
 
-  // Estado para índice actual
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-
-  // Ajustar índice si excede el número de preguntas
-  const safeIndex = Math.min(currentQuestionIndex, Math.max(0, visibleQuestions.length - 1));
-  const currentQuestion = visibleQuestions[safeIndex];
-
-  // Calcular progreso
   const progress = visibleQuestions.length > 0 
-    ? getQuestionProgress(safeIndex, visibleQuestions.length)
+    ? getQuestionProgress(currentQuestionIndex, visibleQuestions.length)
     : 0;
+  
+  const currentQuestion = visibleQuestions[currentQuestionIndex];
 
-  // Manejar respuesta de tipo escala
   const handleScaleAnswer = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: parseInt(value) }));
     setErrors(prev => ({ ...prev, [questionId]: null }));
   };
 
-  // Manejar respuesta de opción única
   const handleSingleAnswer = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
     setErrors(prev => ({ ...prev, [questionId]: null }));
   };
 
-  // Navegación manual
   const handleNext = () => {
-    if (safeIndex < visibleQuestions.length - 1) {
+    if (currentQuestionIndex < visibleQuestions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
   const handlePrevious = () => {
-    if (safeIndex > 0) {
+    if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
     }
   };
 
-  // Enviar respuestas
   const handleSubmit = () => {
     const validation = validateAnswers(answers);
-    
     if (!validation.valid) {
       setErrors({ submit: validation.message });
       return;
     }
-
     const routine = mapAnswersToRoutine(answers);
     onComplete?.(routine);
   };
 
-  // Renderizar input según tipo
   const renderQuestionInput = (question) => {
     if (!question) return null;
 
@@ -172,7 +159,6 @@ export default function Questionnaire({ onComplete, onBack }) {
 
   return (
     <div className="questionnaire-wrapper">
-      {/* Header con progreso */}
       <div className="questionnaire-header">
         <button className="back-btn" onClick={onBack} type="button">
           ← Volver
@@ -184,41 +170,27 @@ export default function Questionnaire({ onComplete, onBack }) {
           <span className="progress-text">{progress}% Completado</span>
         </div>
         <div className="step-counter">
-          Paso {safeIndex + 1} de {visibleQuestions.length}
+          Paso {currentQuestionIndex + 1} de {visibleQuestions.length}
         </div>
       </div>
 
-      {/* Tarjeta de pregunta */}
       <div className="question-card">
         <div className="question-content">
           <h2 className="question-text">{currentQuestion.text}</h2>
-          
-          {currentQuestion.hint && (
-            <p className="question-hint">💡 {currentQuestion.hint}</p>
-          )}
-          
-          <div className="question-input">
-            {renderQuestionInput(currentQuestion)}
-          </div>
+          {currentQuestion.hint && <p className="question-hint">💡 {currentQuestion.hint}</p>}
+          <div className="question-input">{renderQuestionInput(currentQuestion)}</div>
         </div>
       </div>
 
-      {/* Mensajes de error */}
-      {errors.submit && (
-        <div className="error-message" role="alert">
-          ⚠️ {errors.submit}
-        </div>
-      )}
+      {errors.submit && <div className="error-message" role="alert">⚠️ {errors.submit}</div>}
 
-      {/* Navegación */}
       <div className="navigation-buttons">
-        {safeIndex > 0 && (
+        {currentQuestionIndex > 0 && (
           <button className="nav-btn secondary" onClick={handlePrevious} type="button">
             ← Anterior
           </button>
         )}
-        
-        {safeIndex < visibleQuestions.length - 1 ? (
+        {currentQuestionIndex < visibleQuestions.length - 1 ? (
           <button 
             className="nav-btn primary" 
             onClick={handleNext}
@@ -234,16 +206,11 @@ export default function Questionnaire({ onComplete, onBack }) {
         )}
       </div>
 
-      {/* Info de sanación */}
       {answers.goal === 'healing' && (
         <div className="healing-info-box">
-          <p><strong>💚 Modo Sanación:</strong> Las frecuencias terapéuticas se combinan con beats binaurales.</p>
+          <p><strong>💚 Modo Sanación:</strong> Frecuencias terapéuticas específicas.</p>
         </div>
       )}
-
-      <p className="privacy-note">
-        Tus respuestas se procesan localmente. No se comparten con terceros.
-      </p>
     </div>
   );
 }
