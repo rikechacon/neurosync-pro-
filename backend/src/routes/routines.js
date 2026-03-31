@@ -4,7 +4,6 @@ const Routine = require('../models/Routine');
 const Session = require('../models/Session');
 const { authenticateToken } = require('../middleware/auth');
 
-// Todas las rutas requieren autenticación
 router.use(authenticateToken);
 
 // Crear rutina
@@ -12,15 +11,37 @@ router.post('/', async (req, res) => {
   try {
     const routineData = req.body;
     
-    const routine = await Routine.create(req.user.id, routineData);
+    console.log('📥 Datos recibidos del frontend:', routineData);
+    
+    // Mapear datos del frontend al formato de base de datos
+    const dbData = {
+      name: routineData.name,
+      carrier_freq: routineData.carrierFreq || 400,
+      beat_freq: routineData.beatFreq || 6,
+      band: routineData.band || 'theta',
+      nature_sound: routineData.natureSound,
+      duration: routineData.duration,
+      is_healing: routineData.isHealing || false,
+      healing_type: routineData.healingType || routineData.answers?.goal || null,
+      is_schumann: routineData.isSchumann || false,
+      schumann_mode: routineData.schumannMode || null,
+      answers: routineData.answers || {}
+    };
+    
+    console.log('💾 Datos para base de datos:', dbData);
+    
+    const routine = await Routine.create(req.user.id, dbData);
     
     res.status(201).json({
       message: 'Rutina guardada exitosamente',
       routine
     });
   } catch (error) {
-    console.error('Error creando rutina:', error);
-    res.status(500).json({ error: 'Error en el servidor' });
+    console.error('❌ Error creando rutina:', error);
+    res.status(500).json({ 
+      error: 'Error en el servidor',
+      details: error.message 
+    });
   }
 });
 
@@ -72,7 +93,6 @@ router.post('/:id/sessions', async (req, res) => {
   try {
     const sessionData = req.body;
     
-    // Verificar que la rutina existe y pertenece al usuario
     const routine = await Routine.findById(req.params.id, req.user.id);
     if (!routine) {
       return res.status(404).json({ error: 'Rutina no encontrada' });
