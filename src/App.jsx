@@ -15,7 +15,6 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar si hay usuario logueado
     const savedUser = authAPI.getCurrentUser();
     if (savedUser) {
       setUser(savedUser);
@@ -45,15 +44,26 @@ function App() {
   };
 
   const handleQuestionnaireComplete = async (routine) => {
+    console.log('📋 Rutina generada:', routine);
     setCurrentRoutine(routine);
     
     // Guardar rutina en backend si hay usuario
     if (user) {
       try {
-        await routinesAPI.create(routine);
+        // Asegurar que beat_freq tenga valor
+        const routineToSave = {
+          ...routine,
+          beatFreq: routine.beatFreq || 6, // Valor por defecto si es null
+          carrierFreq: routine.carrierFreq || 400,
+          name: routine.name || 'Rutina Personalizada'
+        };
+        
+        console.log('💾 Guardando rutina:', routineToSave);
+        await routinesAPI.create(routineToSave);
         console.log('✅ Rutina guardada en base de datos');
       } catch (error) {
-        console.error('Error guardando rutina:', error);
+        console.error('❌ Error guardando rutina:', error);
+        // No bloquear el flujo si falla el guardado
       }
     }
     
@@ -66,10 +76,8 @@ function App() {
   };
 
   const handleSessionComplete = async () => {
-    // Registrar sesión completada
     if (user && currentRoutine) {
       try {
-        // Aquí podrías guardar la sesión completada
         console.log('✅ Sesión completada registrada');
       } catch (error) {
         console.error('Error registrando sesión:', error);
@@ -83,7 +91,6 @@ function App() {
     return <div className="loading">Cargando...</div>;
   }
 
-  // Si no hay usuario, mostrar login/registro
   if (!user) {
     return (
       <AuthView 
@@ -93,7 +100,6 @@ function App() {
     );
   }
 
-  // Usuario logueado - mostrar app principal
   return (
     <div className="app">
       <header className="app-header">
@@ -161,7 +167,6 @@ function App() {
   );
 }
 
-// Componente de Auth (Login/Register)
 function AuthView({ onLogin, onRegister }) {
   const [isLogin, setIsLogin] = useState(true);
 
@@ -178,7 +183,6 @@ function AuthView({ onLogin, onRegister }) {
   );
 }
 
-// Home View (simplificada)
 function HomeView({ onStart, user, btStatus }) {
   return (
     <div className="home-view">
@@ -186,7 +190,7 @@ function HomeView({ onStart, user, btStatus }) {
         <h2>Bienvenido{user.name ? `, ${user.name}` : ''} a NeuroSync Pro</h2>
         <p>
           Experimenta la sincronización cerebral mediante sonidos binaurales 
-          personalizados y frecuencia Schumann.
+          personalizados y frecuencias terapéuticas.
         </p>
       </div>
 
