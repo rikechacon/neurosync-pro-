@@ -5,6 +5,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import { authAPI, routinesAPI } from './services/api';
 import { checkBluetoothSupport } from './utils/bluetoothCheck';
+import { getSessionProfile, calculateOptimalDuration, getWelcomeMessage } from './utils/sessionProfiles';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [currentRoutine, setCurrentRoutine] = useState(null);
   const [btStatus, setBtStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sessionProfile, setSessionProfile] = useState(null);
 
   useEffect(() => {
     const savedUser = authAPI.getCurrentUser();
@@ -45,15 +47,34 @@ function App() {
 
   const handleQuestionnaireComplete = async (routine) => {
     console.log('📋 Rutina generada:', routine);
-    setCurrentRoutine(routine);
+    
+    // Calcular perfil inteligente basado en respuestas
+    const answers = routine.answers || {};
+    const profile = getSessionProfile(answers);
+    const optimalDuration = calculateOptimalDuration(profile, answers);
+    const welcomeMessage = getWelcomeMessage(profile, answers);
+    
+    console.log(`🧠 Perfil: ${profile.name}`);
+    console.log(`⏱️ Duración óptima: ${optimalDuration}s (${Math.floor(optimalDuration/60)} min)`);
+    console.log(`💬 ${welcomeMessage}`);
+    
+    // Actualizar rutina con duración óptima
+    const enhancedRoutine = {
+      ...routine,
+      duration: optimalDuration,
+      profile: profile.id,
+      profileName: profile.name
+    };
+    
+    setCurrentRoutine(enhancedRoutine);
+    setSessionProfile(profile);
     
     // Guardar rutina en backend si hay usuario
     if (user) {
       try {
-        // Asegurar que beat_freq tenga valor
         const routineToSave = {
-          ...routine,
-          beatFreq: routine.beatFreq || 6, // Valor por defecto si es null
+          ...enhancedRoutine,
+          beatFreq: routine.beatFreq || 6,
           carrierFreq: routine.carrierFreq || 400,
           name: routine.name || 'Rutina Personalizada'
         };
@@ -63,9 +84,11 @@ function App() {
         console.log('✅ Rutina guardada en base de datos');
       } catch (error) {
         console.error('❌ Error guardando rutina:', error);
-        // No bloquear el flujo si falla el guardado
       }
     }
+    
+    // Mostrar mensaje de bienvenida
+    alert(`🧠 ${profile.name}\n\n${welcomeMessage}`);
     
     setCurrentView('playing');
   };
@@ -73,6 +96,7 @@ function App() {
   const handleBackToHome = () => {
     setCurrentView('home');
     setCurrentRoutine(null);
+    setSessionProfile(null);
   };
 
   const handleSessionComplete = async () => {
@@ -85,6 +109,7 @@ function App() {
     }
     setCurrentView('home');
     setCurrentRoutine(null);
+    setSessionProfile(null);
   };
 
   if (loading) {
@@ -112,7 +137,7 @@ function App() {
             🧠 NeuroSync Pro
           </h1>
           <p className="app-subtitle">
-            Estimulación neurosensorial personalizada
+            Estimulación neurosensorial personalizada con IA
           </p>
           
           <div className="header-actions">
@@ -126,6 +151,11 @@ function App() {
             {btStatus && (
               <span className={`status-badge ${btStatus.supported ? 'success' : 'warning'}`}>
                 {btStatus.supported ? '📡 Bluetooth OK' : '📡 Bluetooth limitado'}
+              </span>
+            )}
+            {sessionProfile && (
+              <span className="status-badge info">
+                🧠 {sessionProfile.name}
               </span>
             )}
           </div>
@@ -151,6 +181,7 @@ function App() {
         {currentView === 'playing' && currentRoutine && (
           <AudioPlayer 
             routine={currentRoutine}
+            profile={sessionProfile}
             onComplete={handleSessionComplete}
             onBack={handleBackToHome}
           />
@@ -169,17 +200,10 @@ function App() {
 
 function AuthView({ onLogin, onRegister }) {
   const [isLogin, setIsLogin] = useState(true);
-
   return isLogin ? (
-    <Login 
-      onLogin={onLogin}
-      onSwitchToRegister={() => setIsLogin(false)}
-    />
+    <Login onLogin={onLogin} onSwitchToRegister={() => setIsLogin(false)} />
   ) : (
-    <Register 
-      onRegister={onRegister}
-      onSwitchToLogin={() => setIsLogin(true)}
-    />
+    <Register onRegister={onRegister} onSwitchToLogin={() => setIsLogin(true)} />
   );
 }
 
@@ -188,43 +212,17 @@ function HomeView({ onStart, user, btStatus }) {
     <div className="home-view">
       <div className="welcome-card">
         <h2>Bienvenido{user.name ? `, ${user.name}` : ''} a NeuroSync Pro</h2>
-        <p>
-          Experimenta la sincronización cerebral mediante sonidos binaurales 
-          personalizados y frecuencias terapéuticas.
-        </p>
+        <p>Experimenta la sincronización cerebral con perfiles inteligentes adaptativos.</p>
       </div>
-
       <div className="features-grid">
-        <FeatureCard 
-          icon="🎧"
-          title="Beats Binaurales"
-          description="Sincronización de ondas cerebrales mediante frecuencias precisas"
-        />
-        <FeatureCard 
-          icon="🌍"
-          title="Frecuencia Schumann"
-          description="Conecta con la resonancia natural de la Tierra (7.83 Hz)"
-        />
-        <FeatureCard 
-          icon="🎵"
-          title="Sonidos de Naturaleza"
-          description="Relajación profunda con ambientes naturales"
-        />
-        <FeatureCard 
-          icon="📊"
-          title="Personalización"
-          description="Rutinas adaptadas a tus necesidades específicas"
-        />
+        <FeatureCard icon="🎧" title="Beats Binaurales" description="Sincronización de ondas cerebrales" />
+        <FeatureCard icon="🌍" title="Frecuencia Schumann" description="Conexión con la Tierra (7.83 Hz)" />
+        <FeatureCard icon="🎵" title="Sonidos de Naturaleza" description="Relajación profunda" />
+        <FeatureCard icon="🧠" title="Perfiles Inteligentes" description="Adaptación automática según tu estado" />
       </div>
-
-      <button className="start-btn" onClick={onStart}>
-        🎯 Comenzar Mi Sesión Personalizada
-      </button>
-
+      <button className="start-btn" onClick={onStart}>🎯 Comenzar Mi Sesión Personalizada</button>
       {btStatus && !btStatus.supported && (
-        <div className="notice-card warning">
-          <p>⚠️ {btStatus.message}</p>
-        </div>
+        <div className="notice-card warning"><p>⚠️ {btStatus.message}</p></div>
       )}
     </div>
   );

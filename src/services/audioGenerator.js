@@ -1,7 +1,6 @@
 /**
- * Motor de Audio Binaural - Versión Final Corregida
- * - < 30 Hz: Beats binaurales (diferencia entre canales)
- * - >= 30 Hz: TONO PURO (misma frecuencia en ambos canales)
+ * Motor de Audio Binaural - Versión con Perfiles Inteligentes
+ * Soporta: Fade in/out, frecuencia adaptativa, volumen dinámico
  */
 
 export class BinauralAudioEngine {
@@ -27,6 +26,9 @@ export class BinauralAudioEngine {
     this.currentFreq = null;
     this.isHealingMode = false;
     this.params = null;
+    this.profile = null;
+    this.frequencyRampInterval = null;
+    this.currentRampStage = 0;
   }
 
   async initialize() {
@@ -57,26 +59,41 @@ export class BinauralAudioEngine {
     }
   }
 
-  async playRoutine(params) {
+  async playRoutine(params, profile = null) {
     try {
       await this.initialize();
       this.stop();
       
       this.params = params;
+      this.profile = profile;
       this.currentFreq = params.beatFreq;
       this.isHealingMode = !!params.isHealing;
+
+      console.log(`🎵 Iniciando sesión: ${params.beatFreq} Hz`);
+      if (profile) {
+        console.log(`🧠 Perfil: ${profile.name}`);
+        console.log(`💬 ${profile.message}`);
+      }
+
+      // Aplicar configuración del perfil
+      const fadeIn = profile?.fadeIn?.enabled ? profile.fadeIn : { enabled: false };
+      const natureVolume = profile?.natureVolume?.initial || 0.5;
+
+      // Configurar volumen inicial de naturaleza
+      this.natureGain.gain.value = natureVolume;
 
       // Determinar modo: < 30 Hz = binaural, >= 30 Hz = tono puro
       const useBinaural = this.currentFreq < 30;
       
-      console.log(`🎵 Iniciando: ${this.currentFreq} Hz - Modo: ${useBinaural ? 'BINAURAL' : 'TONO PURO'}`);
-
       if (useBinaural) {
-        // MODO BINAURAL: carrier + beat
-        await this.startBinauralBeats(params.carrierFreq, this.currentFreq);
+        await this.startBinauralBeats(params.carrierFreq, this.currentFreq, fadeIn);
       } else {
-        // MODO TONO PURO: misma frecuencia en ambos canales
-        await this.startPureTone(this.currentFreq);
+        await this.startPureTone(this.currentFreq, fadeIn);
+      }
+
+      // Iniciar rampa de frecuencia si está habilitada
+      if (profile?.frequencyRamp?.enabled && profile.frequencyRamp.stages) {
+        this.startFrequencyRamp(profile.frequencyRamp.stages, params.carrierFreq);
       }
 
       if (params.natureSoundUrl) {
@@ -87,6 +104,11 @@ export class BinauralAudioEngine {
       this.isPaused = false;
       this.startTime = Date.now();
       this.totalDuration = params.duration * 1000;
+
+      // Programar fade out si está habilitado
+      if (profile?.fadeOut?.enabled) {
+        this.scheduleFadeOut(profile.fadeOut);
+      }
 
       setTimeout(() => {
         this.stop();
@@ -105,7 +127,7 @@ export class BinauralAudioEngine {
     }
   }
 
-  async startBinauralBeats(carrierFreq, beatFreq) {
+  async startBinauralBeats(carrierFreq, beatFreq, fadeIn = null) {
     if (!this.audioContext) return;
     
     this.leftOscillator = this.audioContext.createOscillator();
@@ -113,7 +135,6 @@ export class BinauralAudioEngine {
     
     const now = this.audioContext.currentTime;
     
-    // Frecuencias DIFERENTES para crear beat
     this.leftOscillator.frequency.value = carrierFreq;
     this.rightOscillator.frequency.value = carrierFreq + beatFreq;
     this.leftOscillator.type = 'sine';
@@ -121,10 +142,19 @@ export class BinauralAudioEngine {
 
     const leftGain = this.audioContext.createGain();
     const rightGain = this.audioContext.createGain();
-    leftGain.gain.setValueAtTime(0, now);
-    leftGain.gain.linearRampToValueAtTime(0.25, now + 0.1);
-    rightGain.gain.setValueAtTime(0, now);
-    rightGain.gain.linearRampToValueAtTime(0.25, now + 0.1);
+
+    // Aplicar fade in si está configurado
+    if (fadeIn?.enabled) {
+      leftGain.gain.setValueAtTime(fadeIn.initialVolume, now);
+      leftGain.gain.linearRampToValueAtTime(fadeIn.targetVolume, now + fadeIn.duration);
+      rightGain.gain.setValueAtTime(fadeIn.initialVolume, now);
+      rightGain.gain.linearRampToValueAtTime(fadeIn.targetVolume, now + fadeIn.duration);
+      
+      console.log(`🎧 Fade in: ${fadeIn.initialVolume} → ${fadeIn.targetVolume} en ${fadeIn.duration}s`);
+    } else {
+      leftGain.gain.setValueAtTime(0.25, now);
+      rightGain.gain.setValueAtTime(0.25, now);
+    }
 
     this.leftOscillator.connect(leftGain);
     leftGain.connect(this.beatsGain);
@@ -139,7 +169,7 @@ export class BinauralAudioEngine {
     console.log(`🎧 Binaural: Izq=${carrierFreq}Hz, Der=${carrierFreq + beatFreq}Hz, Beat=${beatFreq}Hz`);
   }
 
-  async startPureTone(frequency) {
+  async startPureTone(frequency, fadeIn = null) {
     if (!this.audioContext) return;
     
     this.leftOscillator = this.audioContext.createOscillator();
@@ -147,7 +177,6 @@ export class BinauralAudioEngine {
     
     const now = this.audioContext.currentTime;
     
-    // MISMA frecuencia en ambos canales (TONO PURO)
     this.leftOscillator.frequency.value = frequency;
     this.rightOscillator.frequency.value = frequency;
     this.leftOscillator.type = 'sine';
@@ -155,10 +184,19 @@ export class BinauralAudioEngine {
 
     const leftGain = this.audioContext.createGain();
     const rightGain = this.audioContext.createGain();
-    leftGain.gain.setValueAtTime(0, now);
-    leftGain.gain.linearRampToValueAtTime(0.2, now + 0.1);
-    rightGain.gain.setValueAtTime(0, now);
-    rightGain.gain.linearRampToValueAtTime(0.2, now + 0.1);
+
+    // Aplicar fade in si está configurado
+    if (fadeIn?.enabled) {
+      leftGain.gain.setValueAtTime(fadeIn.initialVolume, now);
+      leftGain.gain.linearRampToValueAtTime(fadeIn.targetVolume, now + fadeIn.duration);
+      rightGain.gain.setValueAtTime(fadeIn.initialVolume, now);
+      rightGain.gain.linearRampToValueAtTime(fadeIn.targetVolume, now + fadeIn.duration);
+      
+      console.log(`🎵 Fade in: ${fadeIn.initialVolume} → ${fadeIn.targetVolume} en ${fadeIn.duration}s`);
+    } else {
+      leftGain.gain.setValueAtTime(0.20, now);
+      rightGain.gain.setValueAtTime(0.20, now);
+    }
 
     this.leftOscillator.connect(leftGain);
     leftGain.connect(this.beatsGain);
@@ -171,6 +209,58 @@ export class BinauralAudioEngine {
     this.rightOscillator.start(now);
     
     console.log(`🎵 Tono puro: ${frequency}Hz en AMBOS canales`);
+  }
+
+  startFrequencyRamp(stages, carrierFreq) {
+    console.log(`📈 Iniciando rampa de frecuencia: ${stages.length} etapas`);
+    
+    this.currentRampStage = 0;
+    const stageDuration = stages[0]?.duration || 300000; // 5 min default
+    
+    const applyStage = (stageIndex) => {
+      if (!this.isPlaying || stageIndex >= stages.length) {
+        console.log('✅ Rampa de frecuencia completada');
+        return;
+      }
+      
+      const stage = stages[stageIndex];
+      this.currentFreq = stage.beatFreq;
+      
+      if (this.rightOscillator && this.leftOscillator) {
+        const now = this.audioContext.currentTime;
+        const targetFreq = carrierFreq + stage.beatFreq;
+        
+        // Transición suave entre frecuencias
+        this.rightOscillator.frequency.setTargetAtTime(targetFreq, now, 10);
+        
+        console.log(`📊 Etapa ${stageIndex + 1}/${stages.length}: ${stage.beatFreq} Hz (${stage.band}) - ${stage.label}`);
+      }
+      
+      // Programar siguiente etapa
+      this.frequencyRampInterval = setTimeout(() => {
+        applyStage(stageIndex + 1);
+      }, stageDuration);
+    };
+    
+    applyStage(0);
+  }
+
+  scheduleFadeOut(fadeOut) {
+    const fadeOutTime = this.totalDuration - (fadeOut.duration * 1000);
+    
+    setTimeout(() => {
+      if (!this.isPlaying || this.isPaused) return;
+      
+      const now = this.audioContext.currentTime;
+      
+      this.beatsGain.gain.setTargetAtTime(
+        fadeOut.finalVolume || 0.05,
+        now,
+        fadeOut.duration / 4
+      );
+      
+      console.log(`📉 Fade out: ${fadeOut.duration}s hacia ${fadeOut.finalVolume || 0.05}`);
+    }, fadeOutTime);
   }
 
   async loadNatureSound(url) {
@@ -198,12 +288,16 @@ export class BinauralAudioEngine {
       clearInterval(this.progressInterval);
       this.progressInterval = null;
     }
+    if (this.frequencyRampInterval) {
+      clearTimeout(this.frequencyRampInterval);
+      this.frequencyRampInterval = null;
+    }
   }
 
   async resume() {
     if (!this.isPaused || !this.params || !this.audioContext) return;
     await this.audioContext.resume();
-    await this.playRoutine(this.params);
+    await this.playRoutine(this.params, this.profile);
   }
 
   stop() {
@@ -212,6 +306,11 @@ export class BinauralAudioEngine {
     if (this.progressInterval) {
       clearInterval(this.progressInterval);
       this.progressInterval = null;
+    }
+    
+    if (this.frequencyRampInterval) {
+      clearTimeout(this.frequencyRampInterval);
+      this.frequencyRampInterval = null;
     }
     
     try {
@@ -256,7 +355,8 @@ export class BinauralAudioEngine {
     return {
       left: this.leftOscillator.frequency.value,
       right: this.rightOscillator.frequency.value,
-      current: this.currentFreq
+      current: this.currentFreq,
+      profile: this.profile?.name
     };
   }
 

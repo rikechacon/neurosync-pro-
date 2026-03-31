@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { audioEngine } from '../../services/audioGenerator';
 import './AudioPlayer.css';
 
-export default function AudioPlayer({ routine, onComplete, onBack }) {
+export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [beatsVolume, setBeatsVolume] = useState(0.25);
@@ -34,14 +34,11 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
     };
   }, [routine, onComplete]);
 
-  // Actualizar frecuencias cuando cambie el estado del audio
   useEffect(() => {
     if (isPlaying) {
       const interval = setInterval(() => {
         const info = audioEngine.getFrequencyInfo();
-        if (info) {
-          setFreqInfo(info);
-        }
+        if (info) setFreqInfo(info);
       }, 500);
       return () => clearInterval(interval);
     }
@@ -69,8 +66,9 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
           schumannMode: routine.schumannMode,
           scanSequence: routine.scanSequence,
           isHealing: routine.isHealing,
-          therapeuticFrequency: routine.beatFreq
-        });
+          therapeuticFrequency: routine.beatFreq,
+          answers: routine.answers
+        }, profile);
         
         audioEngine.setBeatsVolume(beatsVolume);
         audioEngine.setNatureVolume(natureVolume);
@@ -111,11 +109,9 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Calcular frecuencias para mostrar
   const isHealing = routine?.isHealing || routine?.beatFreq >= 30;
   const displayLeft = isHealing ? routine?.beatFreq : routine?.carrierFreq;
   const displayRight = isHealing ? routine?.beatFreq : (routine?.carrierFreq + routine?.beatFreq);
-  const displayBeat = isHealing ? routine?.beatFreq : routine?.beatFreq;
 
   if (error) {
     return (
@@ -136,7 +132,15 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
         <div className="session-badge">{routine?.icon || '🎧'} {routine?.name || 'Sesión'}</div>
       </div>
 
-      {/* Información de frecuencias CORREGIDA */}
+      {/* Mostrar perfil activo */}
+      {profile && (
+        <div className="profile-badge">
+          <span className="profile-icon">🧠</span>
+          <span className="profile-name">{profile.name}</span>
+          <span className="profile-description">{profile.message}</span>
+        </div>
+      )}
+
       <div className="frequency-display-simple">
         <div className="freq-info-box">
           <span className="freq-label">🎧 Izquierdo</span>
@@ -144,7 +148,7 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
         </div>
         <div className="freq-info-box beat">
           <span className="freq-label">{isHealing ? '🎵 Frecuencia' : '🔄 Beat'}</span>
-          <span className="freq-value">{freqInfo.beat || displayBeat} Hz</span>
+          <span className="freq-value">{freqInfo.beat || routine?.beatFreq} Hz</span>
         </div>
         <div className="freq-info-box">
           <span className="freq-label">🎧 Derecho</span>
@@ -165,6 +169,10 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
         <div className="info-card secondary">
           <span className="info-label">Sonido de fondo</span>
           <span className="info-value">{routine?.natureSoundName || 'Ninguno'}</span>
+        </div>
+        <div className="info-card tertiary">
+          <span className="info-label">Duración</span>
+          <span className="info-value">{Math.floor(routine.duration / 60)} min</span>
         </div>
       </div>
 
@@ -191,26 +199,12 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
       <div className="volume-controls">
         <div className="volume-slider">
           <label>🎧 Beats</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="1" 
-            step="0.05" 
-            value={beatsVolume} 
-            onChange={handleBeatsVolumeChange} 
-          />
+          <input type="range" min="0" max="1" step="0.05" value={beatsVolume} onChange={handleBeatsVolumeChange} />
           <span className="volume-value">{Math.round(beatsVolume * 100)}%</span>
         </div>
         <div className="volume-slider">
           <label>🎵 Naturaleza</label>
-          <input 
-            type="range" 
-            min="0" 
-            max="1" 
-            step="0.05" 
-            value={natureVolume} 
-            onChange={handleNatureVolumeChange} 
-          />
+          <input type="range" min="0" max="1" step="0.05" value={natureVolume} onChange={handleNatureVolumeChange} />
           <span className="volume-value">{Math.round(natureVolume * 100)}%</span>
         </div>
       </div>
@@ -226,7 +220,14 @@ export default function AudioPlayer({ routine, onComplete, onBack }) {
       {isHealing && (
         <div className="healing-notice">
           <span className="notice-icon">💚</span>
-          <p><strong>Modo Tono Puro:</strong> Frecuencia {routine?.beatFreq} Hz en ambos canales (Solfeggio/terapéutico)</p>
+          <p><strong>Modo Tono Puro:</strong> Frecuencia {routine?.beatFreq} Hz en ambos canales</p>
+        </div>
+      )}
+
+      {profile?.frequencyRamp?.enabled && (
+        <div className="ramp-notice">
+          <span className="notice-icon">📈</span>
+          <p><strong>Frecuencia Adaptativa:</strong> La frecuencia cambiará gradualmente durante la sesión</p>
         </div>
       )}
     </div>
