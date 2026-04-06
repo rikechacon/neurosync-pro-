@@ -1,55 +1,76 @@
-import { FREQUENCY_PRESETS, NATURE_SOUNDS, SESSION_DURATION } from '../constants/frequencies';
-import { getHealingFrequency } from '../components/Questionnaire/questions';
+import { HEALING_FREQUENCIES } from '../components/Questionnaire/questions';
+import { NATURE_SOUNDS, SESSION_DURATION } from '../constants/frequencies';
 
 export function mapAnswersToRoutine(answers) {
   const { goal, nature_preference, duration } = answers;
 
-  // Verificar si es frecuencia de sanación
-  const healingInfo = getHealingFrequency(goal);
-  const isHealing = !!healingInfo;
+  // Obtener información de la frecuencia
+  const freqInfo = HEALING_FREQUENCIES[goal];
   
   let routineData;
 
-  if (isHealing) {
-    // SANACIÓN: Usar frecuencia terapéutica directa
+  // Verificar categoría por el valor
+  const isSolfeggio = goal?.includes('solfeggio');
+  const isSchumann = goal?.includes('schumann');
+  const isBrainwaves = ['relax', 'focus', 'sleep', 'energy', 'meditation'].includes(goal);
+  const isTherapeutic = ['immune_boost', 'inflammation', 'organs_harmony', 'circulation'].includes(goal);
+  const isNeurological = goal === 'gamma_40hz';
+
+  if (isSolfeggio || isTherapeutic) {
+    // FRECUENCIAS TERAPÉUTICAS/SOLFEGGIO - Tono puro
     routineData = {
       id: `healing_${Date.now()}`,
       isHealing: true,
-      name: getHealingName(goal),
-      icon: '💚',
-      carrierFreq: 0,  // No se usa para healing
-      beatFreq: healingInfo.frequency,  // Frecuencia terapéutica
-      band: healingInfo.band,
+      name: getGoalName(goal),
+      icon: getGoalIcon(goal),
+      carrierFreq: 0,  // No se usa para tonos puros
+      beatFreq: freqInfo?.frequency || 528,
+      band: freqInfo?.band || 'solfeggio',
     };
-  } else if (goal.startsWith('schumann')) {
-    // SCHUMANN
-    const schumannMap = {
-      schumann_pure: { freq: 7.83, name: 'Schumann Puro', icon: '🌍' },
-      schumann_harmonic_1: { freq: 14.3, name: 'Schumann 1er Armónico', icon: '🌍' },
-      schumann_harmonic_2: { freq: 20.8, name: 'Schumann 2do Armónico', icon: '🌍' }
-    };
-    const s = schumannMap[goal];
+  } else if (isSchumann) {
+    // SCHUMANN - Beats binaurales con carrier bajo
     routineData = {
       id: `schumann_${Date.now()}`,
       isHealing: false,
       isSchumann: true,
-      name: s.name,
-      icon: s.icon,
+      name: getGoalName(goal),
+      icon: '🌍',
       carrierFreq: 200,
-      beatFreq: s.freq,
-      band: s.freq < 8 ? 'theta' : 'alpha'
+      beatFreq: freqInfo?.frequency || 7.83,
+      band: 'schumann'
     };
-  } else {
-    // RELAJACIÓN - Brainwaves normales
-    const preset = FREQUENCY_PRESETS[goal] || FREQUENCY_PRESETS.relax;
+  } else if (isBrainwaves) {
+    // BRAINWAVES - Beats binaurales estándar
     routineData = {
       id: `routine_${Date.now()}`,
       isHealing: false,
-      name: preset.name,
-      icon: preset.icon,
-      carrierFreq: preset.carrier,
-      beatFreq: preset.beat,
-      band: preset.band
+      name: getGoalName(goal),
+      icon: getGoalIcon(goal),
+      carrierFreq: 400,
+      beatFreq: freqInfo?.frequency || 6,
+      band: freqInfo?.band || 'theta'
+    };
+  } else if (isNeurological) {
+    // NEUROLÓGICAS - Gamma beats
+    routineData = {
+      id: `neuro_${Date.now()}`,
+      isHealing: false,
+      name: getGoalName(goal),
+      icon: '🧠',
+      carrierFreq: 400,
+      beatFreq: 40,
+      band: 'gamma'
+    };
+  } else {
+    // FALLBACK - Relax por defecto
+    routineData = {
+      id: `routine_${Date.now()}`,
+      isHealing: false,
+      name: 'Sesión Personalizada',
+      icon: '🎧',
+      carrierFreq: 400,
+      beatFreq: 6,
+      band: 'theta'
     };
   }
 
@@ -67,19 +88,53 @@ export function mapAnswersToRoutine(answers) {
   };
 }
 
-function getHealingName(healingType) {
+function getGoalName(goal) {
   const names = {
-    solfeggio_396: 'Liberar Culpa/Miedo (396 Hz)',
-    solfeggio_417: 'Facilitar Cambios (417 Hz)',
-    solfeggio_528: 'Transformación (528 Hz)',
-    solfeggio_639: 'Conexión/Relaciones (639 Hz)',
-    solfeggio_741: 'Expresión/Intuición (741 Hz)',
-    solfeggio_852: 'Despertar Intuición (852 Hz)',
-    solfeggio_963: 'Conexión Divina (963 Hz)',
-    alzheimer_40hz: 'Apoyo Cognitivo (40 Hz)',
-    memory_40hz: 'Memoria y Aprendizaje (40 Hz)',
-    pain_relief: 'Alivio del Dolor (10000 Hz)',
-    balance_528: 'Equilibrio Total (528 Hz)'
+    relax: 'Relajación Profunda',
+    focus: 'Concentración Máxima',
+    sleep: 'Sueño Profundo',
+    energy: 'Energía Mental',
+    meditation: 'Meditación Profunda',
+    schumann_pure: 'Schumann Puro',
+    schumann_harmonic_1: 'Schumann 1er Armónico',
+    schumann_harmonic_2: 'Schumann 2do Armónico',
+    solfeggio_174: 'Anestésico Natural',
+    solfeggio_396: 'Liberar Culpa y Miedo',
+    solfeggio_417: 'Facilitar Cambios',
+    solfeggio_528: 'Transformación y Milagros',
+    solfeggio_639: 'Conexión y Relaciones',
+    solfeggio_741: 'Expresión e Intuición',
+    solfeggio_852: 'Despertar Intuición',
+    solfeggio_963: 'Conexión Divina',
+    gamma_40hz: 'Estimulación Cognitiva',
+    immune_boost: 'Fortalecer Inmunidad',
+    inflammation: 'Reducir Inflamación',
+    organs_harmony: 'Armonización de Órganos',
+    circulation: 'Mejorar Circulación'
   };
-  return names[healingType] || 'Sanación';
+  return names[goal] || 'Sesión Personalizada';
+}
+
+function getGoalIcon(goal) {
+  const icons = {
+    relax: '🧘',
+    focus: '🎯',
+    sleep: '😴',
+    energy: '⚡',
+    meditation: '🧘‍♂️',
+    solfeggio_174: '💊',
+    solfeggio_396: '🎵',
+    solfeggio_417: '🎵',
+    solfeggio_528: '✨',
+    solfeggio_639: '🎵',
+    solfeggio_741: '🎵',
+    solfeggio_852: '🎵',
+    solfeggio_963: '🌟',
+    gamma_40hz: '🧠',
+    immune_boost: '🛡️',
+    inflammation: '🔥',
+    organs_harmony: '🍃',
+    circulation: '❤️'
+  };
+  return icons[goal] || '🎧';
 }

@@ -1,6 +1,7 @@
 /**
- * Questions Configuration - v2.0 (10000 Hz REMOVED)
- * All frequencies in safe range: 40-963 Hz
+ * Questions Configuration - v3.0 (FRECUENCIAS CONSOLIDADAS)
+ * Todas las frecuencias en rango seguro: 40-963 Hz
+ * Sin duplicados - cada frecuencia = única con múltiples beneficios
  */
 
 export const questions = [
@@ -27,44 +28,160 @@ export const questions = [
     text: '¿Cuál es tu principal objetivo en esta sesión?',
     type: 'single',
     options: [
-      // RELAJACIÓN - Brainwaves
-      { value: 'relax', label: '🧘 Relajación profunda', description: 'Theta - Libera tensión y calma la mente', category: 'relaxation' },
-      { value: 'focus', label: '🎯 Concentración', description: 'Alpha - Mejora el enfoque y claridad', category: 'relaxation' },
-      { value: 'sleep', label: '😴 Mejorar sueño', description: 'Delta - Prepara tu cuerpo para descansar', category: 'relaxation' },
-      { value: 'energy', label: '⚡ Más energía', description: 'Beta - Activa tu vitalidad natural', category: 'relaxation' },
-      { value: 'anxiety', label: '🕊️ Reducir ansiedad', description: 'Alpha - Calma pensamientos acelerados', category: 'relaxation' },
-      { value: 'meditation', label: '🧘‍♂️ Meditación Profunda', description: 'Theta profundo - Conciencia expandida', category: 'relaxation' },
+      // ============================================
+      // BRAINWAVES - RELAJACIÓN Y ENFOQUE
+      // ============================================
+      { 
+        value: 'relax', 
+        label: '🧘 Relajación Profunda (Theta 6 Hz)', 
+        description: 'Libera tensión • Calma la mente • Reduce ansiedad', 
+        category: 'brainwaves' 
+      },
+      { 
+        value: 'focus', 
+        label: '🎯 Concentración Máxima (Alpha 12 Hz)', 
+        description: 'Enfoque mental • Claridad • Rendimiento', 
+        category: 'brainwaves' 
+      },
+      { 
+        value: 'sleep', 
+        label: '😴 Sueño Profundo (Delta 3 Hz)', 
+        description: 'Prepara el cuerpo • Descanso reparador', 
+        category: 'brainwaves' 
+      },
+      { 
+        value: 'energy', 
+        label: '⚡ Energía Mental (Beta 20 Hz)', 
+        description: 'Vitalidad • Alerta • Motivación', 
+        category: 'brainwaves' 
+      },
+      { 
+        value: 'meditation', 
+        label: '🧘‍♂️ Meditación Profunda (Theta 4-7 Hz)', 
+        description: 'Conciencia expandida • Paz interior', 
+        category: 'brainwaves' 
+      },
       
-      // SCHUMANN
-      { value: 'schumann_pure', label: '🌍 Schumann Puro 7.83Hz', description: 'Conexión fundamental con la Tierra', category: 'schumann', featured: true },
-      { value: 'schumann_harmonic_1', label: '🌍 Schumann 14.3Hz', description: 'Claridad mental natural', category: 'schumann' },
-      { value: 'schumann_harmonic_2', label: '🌍 Schumann 20.8Hz', description: 'Energía vital equilibrada', category: 'schumann' },
+      // ============================================
+      // RESONANCIA SCHUMANN
+      // ============================================
+      { 
+        value: 'schumann_pure', 
+        label: '🌍 Schumann Puro (7.83 Hz)', 
+        description: 'Conexión con la Tierra • Equilibrio natural • Frecuencia fundamental', 
+        category: 'schumann', 
+        featured: true 
+      },
+      { 
+        value: 'schumann_harmonic_1', 
+        label: '🌍 Schumann 1er Armónico (14.3 Hz)', 
+        description: 'Claridad mental • Energía vital', 
+        category: 'schumann' 
+      },
+      { 
+        value: 'schumann_harmonic_2', 
+        label: '🌍 Schumann 2do Armónico (20.8 Hz)', 
+        description: 'Equilibrio energético • Vitalidad', 
+        category: 'schumann' 
+      },
       
-      // SANACIÓN - Solfeggio (RANGO SEGURO: 396-963 Hz)
-      { value: 'solfeggio_396', label: '🎵 Liberar Culpa/Miedo (396 Hz)', description: 'Solfeggio - Transformación del dolor', category: 'healing' },
-      { value: 'solfeggio_417', label: '🎵 Facilitar Cambios (417 Hz)', description: 'Solfeggio - Deshacer situaciones', category: 'healing' },
-      { value: 'solfeggio_528', label: '🎵 Transformación/Milagros (528 Hz)', description: 'Solfeggio - Reparación ADN', category: 'healing', featured: true },
-      { value: 'solfeggio_639', label: '🎵 Conexión/Relaciones (639 Hz)', description: 'Solfeggio - Armonía interpersonal', category: 'healing' },
-      { value: 'solfeggio_741', label: '🎵 Expresión/Intuición (741 Hz)', description: 'Solfeggio - Limpieza y solución', category: 'healing' },
-      { value: 'solfeggio_852', label: '🎵 Despertar Intuición (852 Hz)', description: 'Solfeggio - Conexión espiritual', category: 'healing' },
-      { value: 'solfeggio_963', label: '🎵 Conexión Divina (963 Hz)', description: 'Solfeggio - Frecuencia de la luz', category: 'healing', featured: true },
+      // ============================================
+      // SOLFEGGIO - FRECUENCIAS SAGRADAS
+      // ============================================
+      { 
+        value: 'solfeggio_174', 
+        label: '💊 Anestésico Natural (174 Hz)', 
+        description: 'Alivio del dolor • Sueño reparador • Relajación muscular profunda', 
+        category: 'solfeggio',
+        benefits: ['Reducción del dolor', 'Inducción al sueño', 'Relajación muscular']
+      },
+      { 
+        value: 'solfeggio_396', 
+        label: '🎵 Liberar Culpa y Miedo (396 Hz)', 
+        description: 'Transforma el dolor • Libera bloqueos • Sanación emocional', 
+        category: 'solfeggio' 
+      },
+      { 
+        value: 'solfeggio_417', 
+        label: '🎵 Facilitar Cambios (417 Hz)', 
+        description: 'Deshace situaciones • Limpia traumas • Abre caminos', 
+        category: 'solfeggio' 
+      },
+      { 
+        value: 'solfeggio_528', 
+        label: '✨ Transformación y Milagros (528 Hz)', 
+        description: 'Reparación ADN • Regeneración celular • Equilibrio total • Sanación profunda', 
+        category: 'solfeggio', 
+        featured: true,
+        benefits: ['Reparación celular', 'Regeneración de piel', 'Equilibrio corporal', 'Transformación']
+      },
+      { 
+        value: 'solfeggio_639', 
+        label: '🎵 Conexión y Relaciones (639 Hz)', 
+        description: 'Armonía interpersonal • Comunicación • Amor y comprensión', 
+        category: 'solfeggio' 
+      },
+      { 
+        value: 'solfeggio_741', 
+        label: '🎵 Expresión e Intuición (741 Hz)', 
+        description: 'Limpieza tóxica • Expresión auténtica • Solución de problemas', 
+        category: 'solfeggio' 
+      },
+      { 
+        value: 'solfeggio_852', 
+        label: '🎵 Despertar Intuición (852 Hz)', 
+        description: 'Conexión espiritual • Intuición elevada • Conciencia superior', 
+        category: 'solfeggio' 
+      },
+      { 
+        value: 'solfeggio_963', 
+        label: '🌟 Conexión Divina (963 Hz)', 
+        description: 'Frecuencia de la luz • Conexión cósmica • Estado superior', 
+        category: 'solfeggio', 
+        featured: true 
+      },
       
-      // Neurológicas (rango bajo - seguro)
-      { value: 'alzheimer_40hz', label: '🧠 Alzheimer/Demencia (40 Hz)', description: 'Estimulación gamma para memoria', category: 'healing' },
-      { value: 'memory_40hz', label: '📚 Memoria y Aprendizaje (40 Hz)', description: 'Mejora la retención', category: 'healing' },
+      // ============================================
+      // NEUROLÓGICAS - COGNICIÓN Y MEMORIA
+      // ============================================
+      { 
+        value: 'gamma_40hz', 
+        label: '🧠 Estimulación Cognitiva (40 Hz)', 
+        description: 'Memoria • Aprendizaje • Función cerebral • Apoyo neurológico', 
+        category: 'neurological',
+        benefits: ['Mejora la memoria', 'Estimulación cognitiva', 'Apoyo en Alzheimer/Demencia']
+      },
       
-      // Terapéuticas (RANGO SEGURO: 160-880 Hz) - 10000 Hz REMOVED
-      { value: 'pain_relief', label: '💊 Alivio del Dolor (174 Hz)', description: 'Solfeggio - Anestésico natural seguro', category: 'healing' },
-      { value: 'inflammation', label: '🔥 Reducir Inflamación (727 Hz)', description: 'Apoyo antiinflamatorio', category: 'healing' },
-      { value: 'immune_boost', label: '🛡️ Fortalecer Inmunidad (650 Hz)', description: 'Estimulación del sistema inmune', category: 'healing' },
-      { value: 'digestion', label: '🍃 Mejorar Digestión (880 Hz)', description: 'Armonización del sistema digestivo', category: 'healing' },
-      { value: 'circulation', label: '❤️ Mejorar Circulación (160 Hz)', description: 'Apoyo al sistema cardiovascular', category: 'healing' },
-      { value: 'respiratory', label: '🫁 Apoyo Respiratorio (880 Hz)', description: 'Frecuencia para pulmones y bronquios', category: 'healing' },
-      { value: 'skin_healing', label: '✨ Regeneración de Piel (528 Hz)', description: 'Solfeggio - Sanación cutánea', category: 'healing' },
-      { value: 'deep_sleep_healing', label: '😴 Sueño Reparador (174 Hz)', description: 'Solfeggio - Frecuencia anestésica', category: 'healing' },
-      { value: 'balance_528', label: '⚖️ Equilibrio Total (528 Hz)', description: 'Armonización completa del cuerpo', category: 'healing', featured: true }
+      // ============================================
+      // TERAPÉUTICAS - ÓRGANOS Y SISTEMAS
+      // ============================================
+      { 
+        value: 'immune_boost', 
+        label: '🛡️ Fortalecer Inmunidad (650 Hz)', 
+        description: 'Estimula defensas • Sistema inmunológico fuerte', 
+        category: 'therapeutic' 
+      },
+      { 
+        value: 'inflammation', 
+        label: '🔥 Reducir Inflamación (727 Hz)', 
+        description: 'Apoyo antiinflamatorio • Recuperación tisular', 
+        category: 'therapeutic' 
+      },
+      { 
+        value: 'organs_harmony', 
+        label: '🍃 Armonización de Órganos (880 Hz)', 
+        description: 'Digestión • Respiración • Sistema interno equilibrado', 
+        category: 'therapeutic',
+        benefits: ['Mejora digestiva', 'Apoyo respiratorio', 'Armonización de órganos internos']
+      },
+      { 
+        value: 'circulation', 
+        label: '❤️ Mejorar Circulación (160 Hz)', 
+        description: 'Sistema cardiovascular • Flujo sanguíneo • Vitalidad', 
+        category: 'therapeutic' 
+      }
     ],
-    hint: 'Todas las frecuencias en rango seguro (40-963 Hz)',
+    hint: '12 frecuencias únicas con múltiples beneficios terapéuticos',
     required: true, order: 3
   },
   {
@@ -114,26 +231,38 @@ export const getQuestionProgress = (currentQuestionIndex, totalQuestions) => {
   return Math.round(((currentQuestionIndex + 1) / totalQuestions) * 100);
 };
 
-// FRECUENCIAS SEGURAS - 10000 Hz REMOVED
+// FRECUENCIAS CONSOLIDADAS - SIN DUPLICADOS
 export const HEALING_FREQUENCIES = {
-  solfeggio_396: { frequency: 396, band: 'solfeggio' },
-  solfeggio_417: { frequency: 417, band: 'solfeggio' },
-  solfeggio_528: { frequency: 528, band: 'solfeggio' },
-  solfeggio_639: { frequency: 639, band: 'solfeggio' },
-  solfeggio_741: { frequency: 741, band: 'solfeggio' },
-  solfeggio_852: { frequency: 852, band: 'solfeggio' },
-  solfeggio_963: { frequency: 963, band: 'solfeggio' },
-  alzheimer_40hz: { frequency: 40, band: 'gamma' },
-  memory_40hz: { frequency: 40, band: 'gamma' },
-  pain_relief: { frequency: 174, band: 'solfeggio' },  // ✅ 174 Hz (NO 10000)
-  inflammation: { frequency: 727, band: 'therapeutic' },
-  immune_boost: { frequency: 650, band: 'therapeutic' },
-  digestion: { frequency: 880, band: 'therapeutic' },
-  circulation: { frequency: 160, band: 'therapeutic' },
-  respiratory: { frequency: 880, band: 'therapeutic' },
-  skin_healing: { frequency: 528, band: 'solfeggio' },  // ✅ 528 Hz (NO 1170)
-  deep_sleep_healing: { frequency: 174, band: 'solfeggio' },
-  balance_528: { frequency: 528, band: 'solfeggio' }
+  // Brainwaves
+  relax: { frequency: 6, band: 'theta', carrier: 400 },
+  focus: { frequency: 12, band: 'alpha', carrier: 400 },
+  sleep: { frequency: 3, band: 'delta', carrier: 400 },
+  energy: { frequency: 20, band: 'beta', carrier: 400 },
+  meditation: { frequency: 5, band: 'theta', carrier: 400 },
+  
+  // Schumann
+  schumann_pure: { frequency: 7.83, band: 'schumann', carrier: 200 },
+  schumann_harmonic_1: { frequency: 14.3, band: 'schumann', carrier: 200 },
+  schumann_harmonic_2: { frequency: 20.8, band: 'schumann', carrier: 200 },
+  
+  // Solfeggio
+  solfeggio_174: { frequency: 174, band: 'solfeggio', carrier: 0 },
+  solfeggio_396: { frequency: 396, band: 'solfeggio', carrier: 0 },
+  solfeggio_417: { frequency: 417, band: 'solfeggio', carrier: 0 },
+  solfeggio_528: { frequency: 528, band: 'solfeggio', carrier: 0 },
+  solfeggio_639: { frequency: 639, band: 'solfeggio', carrier: 0 },
+  solfeggio_741: { frequency: 741, band: 'solfeggio', carrier: 0 },
+  solfeggio_852: { frequency: 852, band: 'solfeggio', carrier: 0 },
+  solfeggio_963: { frequency: 963, band: 'solfeggio', carrier: 0 },
+  
+  // Neurológicas
+  gamma_40hz: { frequency: 40, band: 'gamma', carrier: 400 },
+  
+  // Terapéuticas
+  immune_boost: { frequency: 650, band: 'therapeutic', carrier: 0 },
+  inflammation: { frequency: 727, band: 'therapeutic', carrier: 0 },
+  organs_harmony: { frequency: 880, band: 'therapeutic', carrier: 0 },
+  circulation: { frequency: 160, band: 'therapeutic', carrier: 0 }
 };
 
 export const getHealingFrequency = (healingType) => {
