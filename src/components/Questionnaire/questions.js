@@ -1,3 +1,8 @@
+/**
+ * Questions Configuration - v2.0 (10000 Hz REMOVED)
+ * All frequencies in safe range: 40-963 Hz
+ */
+
 export const questions = [
   {
     id: 'stress_level',
@@ -35,7 +40,7 @@ export const questions = [
       { value: 'schumann_harmonic_1', label: '🌍 Schumann 14.3Hz', description: 'Claridad mental natural', category: 'schumann' },
       { value: 'schumann_harmonic_2', label: '🌍 Schumann 20.8Hz', description: 'Energía vital equilibrada', category: 'schumann' },
       
-      // SANACIÓN - Solfeggio y terapéuticas
+      // SANACIÓN - Solfeggio (RANGO SEGURO: 396-963 Hz)
       { value: 'solfeggio_396', label: '🎵 Liberar Culpa/Miedo (396 Hz)', description: 'Solfeggio - Transformación del dolor', category: 'healing' },
       { value: 'solfeggio_417', label: '🎵 Facilitar Cambios (417 Hz)', description: 'Solfeggio - Deshacer situaciones', category: 'healing' },
       { value: 'solfeggio_528', label: '🎵 Transformación/Milagros (528 Hz)', description: 'Solfeggio - Reparación ADN', category: 'healing', featured: true },
@@ -43,12 +48,23 @@ export const questions = [
       { value: 'solfeggio_741', label: '🎵 Expresión/Intuición (741 Hz)', description: 'Solfeggio - Limpieza y solución', category: 'healing' },
       { value: 'solfeggio_852', label: '🎵 Despertar Intuición (852 Hz)', description: 'Solfeggio - Conexión espiritual', category: 'healing' },
       { value: 'solfeggio_963', label: '🎵 Conexión Divina (963 Hz)', description: 'Solfeggio - Frecuencia de la luz', category: 'healing', featured: true },
+      
+      // Neurológicas (rango bajo - seguro)
       { value: 'alzheimer_40hz', label: '🧠 Alzheimer/Demencia (40 Hz)', description: 'Estimulación gamma para memoria', category: 'healing' },
       { value: 'memory_40hz', label: '📚 Memoria y Aprendizaje (40 Hz)', description: 'Mejora la retención', category: 'healing' },
-      { value: 'pain_relief', label: '💊 Alivio del Dolor (10000 Hz)', description: 'Frecuencia analgésica natural', category: 'healing' },
-      { value: 'balance_528', label: '⚖️ Equilibrio Total (528 Hz)', description: 'Armonización completa', category: 'healing', featured: true }
+      
+      // Terapéuticas (RANGO SEGURO: 160-880 Hz) - 10000 Hz REMOVED
+      { value: 'pain_relief', label: '💊 Alivio del Dolor (174 Hz)', description: 'Solfeggio - Anestésico natural seguro', category: 'healing' },
+      { value: 'inflammation', label: '🔥 Reducir Inflamación (727 Hz)', description: 'Apoyo antiinflamatorio', category: 'healing' },
+      { value: 'immune_boost', label: '🛡️ Fortalecer Inmunidad (650 Hz)', description: 'Estimulación del sistema inmune', category: 'healing' },
+      { value: 'digestion', label: '🍃 Mejorar Digestión (880 Hz)', description: 'Armonización del sistema digestivo', category: 'healing' },
+      { value: 'circulation', label: '❤️ Mejorar Circulación (160 Hz)', description: 'Apoyo al sistema cardiovascular', category: 'healing' },
+      { value: 'respiratory', label: '🫁 Apoyo Respiratorio (880 Hz)', description: 'Frecuencia para pulmones y bronquios', category: 'healing' },
+      { value: 'skin_healing', label: '✨ Regeneración de Piel (528 Hz)', description: 'Solfeggio - Sanación cutánea', category: 'healing' },
+      { value: 'deep_sleep_healing', label: '😴 Sueño Reparador (174 Hz)', description: 'Solfeggio - Frecuencia anestésica', category: 'healing' },
+      { value: 'balance_528', label: '⚖️ Equilibrio Total (528 Hz)', description: 'Armonización completa del cuerpo', category: 'healing', featured: true }
     ],
-    hint: 'Selecciona la frecuencia que deseas experimentar',
+    hint: 'Todas las frecuencias en rango seguro (40-963 Hz)',
     required: true, order: 3
   },
   {
@@ -84,12 +100,10 @@ export const getOrderedQuestions = () => [...questions].sort((a, b) => a.order -
 
 export const validateAnswers = (answers) => {
   const requiredQuestions = questions.filter(q => q.required);
-  
   const missing = requiredQuestions.filter(q => {
     const value = answers[q.id];
     return value === undefined || value === null || value === '';
   });
-  
   if (missing.length > 0) {
     return { valid: false, message: `Por favor responde: ${missing.map(q => q.text.split('?')[0]).join(', ')}?` };
   }
@@ -100,7 +114,7 @@ export const getQuestionProgress = (currentQuestionIndex, totalQuestions) => {
   return Math.round(((currentQuestionIndex + 1) / totalQuestions) * 100);
 };
 
-// Mapeo de frecuencias de sanación
+// FRECUENCIAS SEGURAS - 10000 Hz REMOVED
 export const HEALING_FREQUENCIES = {
   solfeggio_396: { frequency: 396, band: 'solfeggio' },
   solfeggio_417: { frequency: 417, band: 'solfeggio' },
@@ -111,7 +125,14 @@ export const HEALING_FREQUENCIES = {
   solfeggio_963: { frequency: 963, band: 'solfeggio' },
   alzheimer_40hz: { frequency: 40, band: 'gamma' },
   memory_40hz: { frequency: 40, band: 'gamma' },
-  pain_relief: { frequency: 10000, band: 'therapeutic' },
+  pain_relief: { frequency: 174, band: 'solfeggio' },  // ✅ 174 Hz (NO 10000)
+  inflammation: { frequency: 727, band: 'therapeutic' },
+  immune_boost: { frequency: 650, band: 'therapeutic' },
+  digestion: { frequency: 880, band: 'therapeutic' },
+  circulation: { frequency: 160, band: 'therapeutic' },
+  respiratory: { frequency: 880, band: 'therapeutic' },
+  skin_healing: { frequency: 528, band: 'solfeggio' },  // ✅ 528 Hz (NO 1170)
+  deep_sleep_healing: { frequency: 174, band: 'solfeggio' },
   balance_528: { frequency: 528, band: 'solfeggio' }
 };
 
