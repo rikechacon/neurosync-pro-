@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroSync Pro - Estimulación Neurosensorial Personalizada</title>
+    <meta name="description" content="Experimenta la sincronización cerebral con beats binaurales, frecuencias Solfeggio y resonancia Schumann. Perfiles inteligentes adaptados a tu estado.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e8e8e8;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: #a0a0a0;
+            margin-bottom: 2rem;
+        }
+        
+        .hero .tagline {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            color: #c0c0c0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: rgba(22, 33, 62, 0.5);
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+            color: #6366f1;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #8b5cf6;
+        }
+        
+        .feature-card p {
+            color: #a0a0a0;
+            line-height: 1.8;
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 6rem 0;
+            background: rgba(22, 33, 62, 0.3);
+        }
+        
+        .pricing h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #6366f1;
+        }
+        
+        .pricing .subtitle {
+            text-align: center;
+            color: #a0a0a0;
+            margin-bottom: 4rem;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: rgba(99, 102, 241, 0.1);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .pricing-card.featured {
+            border-color: #8b5cf6;
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+        }
+        
+        .pricing-card.featured::before {
+            content: "MÁS POPULAR";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #6366f1;
+            margin: 2rem 0;
+        }
+        
+        .price span {
+            font-size: 1rem;
+            color: #a0a0a0;
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .pricing-card ul li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .pricing-card ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            background: rgba(22, 33, 62, 0.8);
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        footer p {
+            color: #666;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .features h2,
+            .pricing h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+<link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>🧠 NeuroSync Pro</h1>
+            <p class="subtitle">Estimulación Neurosensorial Personalizada</p>
+            <p class="tagline">
+                Experimenta la sincronización cerebral con beats binaurales, 
+                frecuencias Solfeggio y resonancia Schumann. Perfiles inteligentes 
+                que se adaptan automáticamente a tu estado.
+            </p>
+            <a href="https://stunning-meme-wr4vw9w6wp9gc9569-5173.app.github.dev" class="cta-button">
+                Comenzar Ahora - Prueba Gratis
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2>¿Por Qué NeuroSync Pro?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎧</div>
+                    <h3>Beats Binaurales</h3>
+                    <p>Sincronización de ondas cerebrales mediante frecuencias precisas. Delta, Theta, Alpha, Beta y Gamma para diferentes estados mentales.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Resonancia Schumann</h3>
+                    <p>Conecta con la frecuencia fundamental de la Tierra (7.83 Hz) y sus armónicos para equilibrio natural y grounding.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <h3>Frecuencias Solfeggio</h3>
+                    <p>8 frecuencias sagradas (396-963 Hz) utilizadas durante siglos para sanación, transformación y elevación espiritual.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Perfiles Inteligentes</h3>
+                    <p>7 perfiles adaptativos que ajustan automáticamente la sesión según tu nivel de estrés, calidad de sueño y objetivos.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <h3>Sonidos de Naturaleza</h3>
+                    <p>5 ambientes naturales (lluvia, océano, arroyo, pájaros, grillos) para una experiencia inmersiva y relajante.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Personalización Total</h3>
+                    <p>Guarda tus rutinas favoritas, ajusta volúmenes, y accede a tu historial de sesiones desde cualquier dispositivo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing">
+        <div class="container">
+            <h2>Planes y Precios</h2>
+            <p class="subtitle">Elige el plan que mejor se adapte a ti</p>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Prueba Gratis</h3>
+                    <div class="price">$0<span>/inicio</span></div>
+                    <ul>
+                        <li>3 sesiones gratuitas</li>
+                        <li>1 semana de trial completo</li>
+                        <li>Acceso a todas las frecuencias</li>
+                        <li>Sin tarjeta de crédito</li>
+                    </ul>
+                    <a href="https://stunning-meme-wr4vw9w6wp9gc9569-5173.app.github.dev" class="cta-button" style="padding: 1rem 2rem; font-size: 1rem;">
+                        Probar Ahora
+                    </a>
+                </div>
+                
+                <div class="pricing-card featured">
+                    <h3>Suscripción Mensual</h3>
+                    <div class="price">$4.99<span>/mes</span></div>
+                    <ul>
+                        <li>Sesiones ilimitadas</li>
+                        <li>Todas las frecuencias</li>
+                        <li>Perfiles inteligentes</li>
+                        <li>Guardar rutinas</li>
+                        <li>Sin anuncios</li>
+                        <li>Soporte prioritario</li>
+                    </ul>
+                    <a href="#" class="cta-button" style="padding: 1rem 2rem; font-size: 1rem;">
+                        Suscribirse
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2026 NeuroSync Pro. Todos los derechos reservados.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                Este producto no es un dispositivo médico. Consulta con un profesional de la salud si tienes condiciones médicas.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
