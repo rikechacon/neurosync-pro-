@@ -5,57 +5,141 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Política de Privacidad - NeuroSync Pro</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
-        h1 { color: #6366f1; }
-        h2 { color: #8b5cf6; margin-top: 2rem; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e8e8e8;
+            line-height: 1.8;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        h1 { color: #6366f1; margin-bottom: 0.5rem; font-size: 2.5rem; }
+        .subtitle { color: #a0a0a0; margin-bottom: 2rem; font-size: 0.9rem; }
+        h2 { color: #8b5cf6; margin: 2rem 0 1rem; font-size: 1.5rem; }
+        p { margin-bottom: 1rem; }
+        ul { margin: 1rem 0; padding-left: 2rem; }
+        li { margin-bottom: 0.5rem; }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #6366f1;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #6366f1;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .back-link:hover { background: rgba(99, 102, 241, 0.1); }
     </style>
 </head>
 <body>
-    <h1>🔒 NeuroSync Pro - Política de Privacidad</h1>
-    <p>Última actualización: <script>document.write(new Date().toLocaleDateString())</script></p>
+    <div class="container">
+        <h1>🔒 NeuroSync Pro</h1>
+        <p class="subtitle">Política de Privacidad - Última actualización: <script>document.write(new Date().toLocaleDateString())</script></p>
 
-    <h2>1. Información que Recopilamos</h2>
-    <ul>
-        <li>Email y contraseña (encriptada)</li>
-        <li>Nombre (opcional)</li>
-        <li>Historial de sesiones y rutinas</li>
-        <li>Preferencias de uso</li>
-    </ul>
+        <h2>1. Información que Recopilamos</h2>
+        <p>Recopilamos la siguiente información para proporcionar nuestros servicios:</p>
+        <ul>
+            <li><strong>Información de cuenta:</strong> Email, contraseña encriptada, nombre (opcional)</li>
+            <li><strong>Datos de uso:</strong> Historial de sesiones, rutinas guardadas, preferencias</li>
+            <li><strong>Datos técnicos:</strong> Tipo de dispositivo, navegador, dirección IP</li>
+            <li><strong>Datos de pago:</strong> Procesados de forma segura por Gumroad (no almacenamos datos de tarjetas)</li>
+        </ul>
 
-    <h2>2. Cómo Usamos tu Información</h2>
-    <ul>
-        <li>Proporcionar el servicio</li>
-        <li>Guardar tu progreso y rutinas</li>
-        <li>Mejorar la experiencia</li>
-        <li>Comunicarnos contigo (con tu permiso)</li>
-    </ul>
+        <h2>2. Cómo Usamos su Información</h2>
+        <p>Utilizamos su información para:</p>
+        <ul>
+            <li>Proporcionar y mantener el servicio</li>
+            <li>Guardar su progreso y rutinas personalizadas</li>
+            <li>Procesar pagos y suscripciones</li>
+            <li>Mejorar la experiencia del usuario</li>
+            <li>Enviar comunicaciones importantes (actualizaciones, cambios en términos)</li>
+            <li>Prevenir fraudes y abusos</li>
+        </ul>
 
-    <h2>3. No Compartimos tu Información</h2>
-    <p>No vendemos ni compartimos tus datos con terceros, excepto:</p>
-    <ul>
-        <li>Proveedores de servicios esenciales (Render, Stripe)</li>
-        <li>Cuando la ley lo requiera</li>
-    </ul>
+        <h2>3. Base Legal para el Procesamiento</h2>
+        <p>Procesamos sus datos basados en:</p>
+        <ul>
+            <li><strong>Ejecución del contrato:</strong> Para proporcionar el servicio que solicitó</li>
+            <li><strong>Interés legítimo:</strong> Para mejorar nuestros servicios y prevenir fraudes</li>
+            <li><strong>Consentimiento:</strong> Para comunicaciones de marketing (puede retirar en cualquier momento)</li>
+        </ul>
 
-    <h2>4. Seguridad</h2>
-    <p>Usamos encriptación y prácticas de seguridad estándar de la industria.</p>
+        <h2>4. Compartición de Datos</h2>
+        <p><strong>NO vendemos ni compartimos sus datos personales con terceros</strong>, excepto:</p>
+        <ul>
+            <li><strong>Proveedores de servicios esenciales:</strong>
+                <ul>
+                    <li>Render (hosting de backend)</li>
+                    <li>Vercel (hosting de frontend)</li>
+                    <li>Gumroad (procesamiento de pagos)</li>
+                </ul>
+            </li>
+            <li><strong>Cuando la ley lo requiera:</strong> Orden judicial o requerimiento legal</li>
+            <li><strong>Para proteger derechos:</strong> Prevenir fraudes o proteger nuestra propiedad</li>
+        </ul>
 
-    <h2>5. Tus Derechos</h2>
-    <ul>
-        <li>Acceder a tus datos</li>
-        <li>Corregir información incorrecta</li>
-        <li>Solicitar eliminación de cuenta</li>
-        <li>Exportar tus datos</li>
-    </ul>
+        <h2>5. Seguridad de Datos</h2>
+        <p>Implementamos medidas de seguridad:</p>
+        <ul>
+            <li>Encriptación de contraseñas con bcrypt</li>
+            <li>Conexiones HTTPS/SSL en todo momento</li>
+            <li>Tokens JWT para autenticación segura</li>
+            <li>Base de datos PostgreSQL con acceso restringido</li>
+            <li>Actualizaciones regulares de seguridad</li>
+        </ul>
 
-    <h2>6. Cookies</h2>
-    <p>Usamos cookies esenciales para el funcionamiento del servicio.</p>
+        <h2>6. Retención de Datos</h2>
+        <p>Conservamos sus datos:</p>
+        <ul>
+            <li>Mientras su cuenta esté activa</li>
+            <li>Hasta 2 años después de la última actividad</li>
+            <li>Luego se eliminan automáticamente</li>
+            <li>Puede solicitar eliminación en cualquier momento</li>
+        </ul>
 
-    <h2>7. Contacto</h2>
-    <p>Para preguntas de privacidad: rikechaconpi@gmail.com</p>
+        <h2>7. Sus Derechos</h2>
+        <p>Tiene derecho a:</p>
+        <ul>
+            <li>✅ Acceder a sus datos personales</li>
+            <li>✅ Corregir información incorrecta</li>
+            <li>✅ Solicitar eliminación de su cuenta y datos</li>
+            <li>✅ Exportar sus datos en formato estructurado</li>
+            <li>✅ Oponerse al procesamiento de sus datos</li>
+            <li>✅ Retirar su consentimiento en cualquier momento</li>
+        </ul>
+        <p>Para ejercer estos derechos, contáctenos: <a href="mailto:rikechaconpi@gmail.com" style="color: #6366f1;">rikechaconpi@gmail.com</a></p>
 
-    <p style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e5e5e5;">
-        © 2026 NeuroSync Pro. Todos los derechos reservados.
-    </p>
+        <h2>8. Cookies</h2>
+        <p>Utilizamos cookies esenciales para:</p>
+        <ul>
+            <li>Mantener su sesión activa</li>
+            <li>Recordar sus preferencias</li>
+            <li>Mejorar el rendimiento del sitio</li>
+        </ul>
+        <p>Puede configurar su navegador para rechazar cookies, pero algunas funciones pueden no funcionar correctamente.</p>
+
+        <h2>9. Menores de Edad</h2>
+        <p>No recopilamos intencionalmente información de menores de 13 años. Si descubre que un menor nos ha proporcionado datos, contáctenos para eliminarlos inmediatamente.</p>
+
+        <h2>10. Transferencias Internacionales</h2>
+        <p>Sus datos pueden transferirse fuera de su país (servidores en USA/Europa). Garantizamos protección adecuada mediante cláusulas contractuales estándar.</p>
+
+        <h2>11. Cambios a esta Política</h2>
+        <p>Podemos actualizar esta política ocasionalmente. Notificaremos cambios importantes por email o mediante aviso prominente en la aplicación.</p>
+
+        <h2>12. Contacto</h2>
+        <p>Para preguntas sobre privacidad: <a href="mailto:rikechaconpi@gmail.com" style="color: #6366f1;">rikechaconpi@gmail.com</a></p>
+
+        <a href="https://rikechacon.github.io/neurosync-pro-/" class="back-link">← Volver a la Landing</a>
+    </div>
 </body>
 </html>

@@ -5,53 +5,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Términos de Servicio - NeuroSync Pro</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
-        h1 { color: #6366f1; }
-        h2 { color: #8b5cf6; margin-top: 2rem; }
-        .disclaimer { background: #fef3c7; padding: 1rem; border-left: 4px solid #f59e0b; margin: 2rem 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e8e8e8;
+            line-height: 1.8;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        h1 {
+            color: #6366f1;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+        .subtitle {
+            color: #a0a0a0;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        h2 {
+            color: #8b5cf6;
+            margin: 2rem 0 1rem;
+            font-size: 1.5rem;
+        }
+        p { margin-bottom: 1rem; }
+        ul {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        li { margin-bottom: 0.5rem; }
+        .warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+        .warning h3 {
+            color: #ef4444;
+            margin-bottom: 1rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #6366f1;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #6366f1;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .back-link:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        @media (max-width: 768px) {
+            .container { padding: 2rem; }
+            h1 { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
-    <h1>🧠 NeuroSync Pro - Términos de Servicio</h1>
-    <p>Última actualización: <script>document.write(new Date().toLocaleDateString())</script></p>
+    <div class="container">
+        <h1>🧠 NeuroSync Pro</h1>
+        <p class="subtitle">Términos de Servicio - Última actualización: <script>document.write(new Date().toLocaleDateString())</script></p>
 
-    <h2>1. Aceptación de los Términos</h2>
-    <p>Al usar NeuroSync Pro, aceptas estos términos de servicio.</p>
+        <h2>1. Aceptación de los Términos</h2>
+        <p>Al acceder y utilizar NeuroSync Pro ("la Aplicación"), usted acepta y se obliga a cumplir estos Términos de Servicio. Si no está de acuerdo con estos términos, por favor no utilice la aplicación.</p>
 
-    <h2>2. Descripción del Servicio</h2>
-    <p>NeuroSync Pro proporciona estimulación neurosensorial mediante sonidos binaurales y frecuencias terapéuticas.</p>
-
-    <div class="disclaimer">
-        <h2>⚠️ 3. Descargo de Responsabilidad Médica</h2>
-        <p><strong>NeuroSync Pro NO es un dispositivo médico.</strong> Este servicio:</p>
+        <h2>2. Descripción del Servicio</h2>
+        <p>NeuroSync Pro es una aplicación de estimulación neurosensorial que proporciona:</p>
         <ul>
-            <li>No diagnostica, trata, cura ni previene ninguna enfermedad</li>
-            <li>No sustituye el consejo médico profesional</li>
-            <li>Es solo para propósitos de bienestar y relajación</li>
-            <li>Consulta con un profesional de la salud si tienes condiciones médicas</li>
-            <li>No usar si tienes epilepsia, marcapasos, o estás embarazada sin consultar médico</li>
+            <li>Beats binaurales y frecuencias terapéuticas</li>
+            <li>Frecuencias Solfeggio y resonancia Schumann</li>
+            <li>Perfiles inteligentes adaptativos</li>
+            <li>Sonidos de naturaleza</li>
+            <li>Sesiones personalizadas de audio</li>
         </ul>
+
+        <div class="warning">
+            <h3>⚠️ 3. Descargo de Responsabilidad Médica IMPORTANTE</h3>
+            <p><strong>NeuroSync Pro NO es un dispositivo médico ni proporciona tratamiento médico.</strong></p>
+            <p>La aplicación:</p>
+            <ul>
+                <li>NO diagnostica, trata, cura ni previene ninguna enfermedad</li>
+                <li>NO sustituye el consejo, diagnóstico o tratamiento médico profesional</li>
+                <li>Es solo para propósitos de bienestar, relajación y entretenimiento</li>
+                <li>NO debe usarse como reemplazo de atención médica profesional</li>
+            </ul>
+            <p><strong>Consulte siempre con un profesional de la salud calificado antes de usar esta aplicación si:</strong></p>
+            <ul>
+                <li>Tiene epilepsia o trastornos convulsivos</li>
+                <li>Usa marcapasos u otros dispositivos médicos implantados</li>
+                <li>Está embarazada</li>
+                <li>Tiene condiciones psiquiátricas</li>
+                <li>Toma medicamentos que afectan el sistema nervioso</li>
+                <li>Tiene migrañas crónicas o trastornos neurológicos</li>
+            </ul>
+            <p><strong>NO utilice la aplicación mientras conduce u opera maquinaria pesada.</strong></p>
+        </div>
+
+        <h2>4. Suscripción y Pagos</h2>
+        <ul>
+            <li><strong>Prueba gratuita:</strong> 3 sesiones + 1 semana de acceso completo</li>
+            <li><strong>Suscripción mensual:</strong> $2.99 USD/mes (precio sujeto a cambios)</li>
+            <li>La suscripción se renueva automáticamente cada mes</li>
+            <li>Puede cancelar en cualquier momento desde su cuenta de Gumroad</li>
+            <li>No hay reembolsos por períodos parciales no utilizados</li>
+        </ul>
+
+        <h2>5. Cuenta de Usuario</h2>
+        <ul>
+            <li>Debe proporcionar información precisa y completa al registrarse</li>
+            <li>Es responsable de mantener la confidencialidad de su contraseña</li>
+            <li>Debe notificar inmediatamente cualquier uso no autorizado</li>
+            <li>Una cuenta por persona (no se permite compartir cuentas)</li>
+        </ul>
+
+        <h2>6. Propiedad Intelectual</h2>
+        <p>Todo el contenido de NeuroSync Pro (audio, diseño, código, marcas) está protegido por derechos de autor y propiedad intelectual. No puede copiar, distribuir ni modificar el contenido sin autorización expresa.</p>
+
+        <h2>7. Limitación de Responsabilidad</h2>
+        <p>NeuroSync Pro y sus desarrolladores NO serán responsables por:</p>
+        <ul>
+            <li>Daños directos, indirectos, incidentales o consecuentes</li>
+            <li>Pérdida de datos o información</li>
+            <li>Interrupciones del servicio</li>
+            <li>Problemas técnicos o de conectividad</li>
+            <li>Uso indebido de la aplicación</li>
+            <li>Cualquier efecto adverso del uso de la aplicación</li>
+        </ul>
+
+        <h2>8. Privacidad</h2>
+        <p>Su privacidad es importante. Consulte nuestra <a href="privacy.html" style="color: #6366f1;">Política de Privacidad</a> para información sobre cómo recopilamos y usamos sus datos.</p>
+
+        <h2>9. Modificaciones</h2>
+        <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación en la aplicación.</p>
+
+        <h2>10. Terminación</h2>
+        <p>Podemos suspender o terminar su acceso a la aplicación inmediatamente, sin previo aviso, por cualquier motivo, incluyendo violación de estos términos.</p>
+
+        <h2>11. Ley Aplicable</h2>
+        <p>Estos términos se rigen por las leyes de Colombia. Cualquier disputa se resolverá en los tribunales competentes de Colombia.</p>
+
+        <h2>12. Contacto</h2>
+        <p>Para preguntas sobre estos términos: <a href="mailto:rikechaconpi@gmail.com" style="color: #6366f1;">rikechaconpi@gmail.com</a></p>
+
+        <a href="https://rikechacon.github.io/neurosync-pro-/" class="back-link">← Volver a la Landing</a>
     </div>
-
-    <h2>4. Suscripción y Pagos</h2>
-    <ul>
-        <li>3 sesiones gratuitas de prueba</li>
-        <li>1 semana de trial gratis después del registro</li>
-        <li>Suscripción mensual de bajo costo (precio a definir)</li>
-        <li>Cancela en cualquier momento</li>
-    </ul>
-
-    <h2>5. Privacidad</h2>
-    <p>Tus datos se almacenan de forma segura. Ver nuestra Política de Privacidad.</p>
-
-    <h2>6. Limitación de Responsabilidad</h2>
-    <p>NeuroSync Pro no se hace responsable de ningún daño derivado del uso del servicio.</p>
-
-    <h2>7. Contacto</h2>
-    <p>Para preguntas: rikechaconpi@gmail.com</p>
-
-    <p style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e5e5e5;">
-        © 2026 NeuroSync Pro. Todos los derechos reservados.
-    </p>
 </body>
 </html>
