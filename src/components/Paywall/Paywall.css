@@ -1,0 +1,134 @@
+.paywall-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+}
+
+.paywall-modal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  border-radius: 24px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.4);
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: #a0a0a0;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.paywall-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.paywall-header h2 {
+  color: #6366f1;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.trial-expired, .sessions-limit {
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #ef4444;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.trial-expired h3, .sessions-limit h3 {
+  color: #ef4444;
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
+}
+
+.pricing-features {
+  margin: 2rem 0;
+}
+
+.feature {
+  padding: 0.5rem 0;
+  color: #e8e8e8;
+  font-size: 0.95rem;
+}
+
+.pricing-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.btn-trial, .btn-subscribe {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-trial {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.btn-subscribe {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+.btn-trial:hover, .btn-subscribe:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+}
+
+.trial-active-notice {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #10b981;
+}
+
+.cancel-anytime {
+  text-align: center;
+  color: #666;
+  font-size: 0.85rem;
+  margin: 1.5rem 0;
+}
