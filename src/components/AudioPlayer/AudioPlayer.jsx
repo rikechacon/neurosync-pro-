@@ -33,15 +33,21 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
         throw new Error('Rutina o perfil no definido');
       }
 
-      const beatFreq = profile.defaultBeatFreq || routine.beatFreq || 10;
-      const carrierFreq = profile.carrierFreq || routine.carrierFreq || 300;
+      // USAR defaultBeatFreq DEL PERFIL (ya ajustado por intensidad)
+      const beatFreq = profile.defaultBeatFreq || 10;
+      const carrierFreq = profile.carrierFreq || 300;
       const duration = routine.duration || 20;
 
-      console.log('🎵 Iniciando sesión:', { profile: profile.name, beatFreq, carrierFreq, duration });
+      console.log('🎵 Sesión:', {
+        profile: profile.name,
+        beatFreq,
+        carrierFreq,
+        duration,
+        brainwave: profile.brainwave
+      });
 
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       
-      // Master gain para controlar todo el audio
       masterGainRef.current = audioContextRef.current.createGain();
       masterGainRef.current.gain.value = 1;
       masterGainRef.current.connect(audioContextRef.current.destination);
@@ -73,7 +79,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     
     console.log('🎧 Frecuencias:', { left: leftFreq, right: rightFreq, beat: beatFreq });
 
-    // Canal izquierdo
     const oscLeft = ctx.createOscillator();
     const gainLeft = ctx.createGain();
     oscLeft.frequency.value = leftFreq;
@@ -83,7 +88,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     gainLeft.connect(masterGainRef.current);
     oscLeft.start();
 
-    // Canal derecho
     const oscRight = ctx.createOscillator();
     const gainRight = ctx.createGain();
     oscRight.frequency.value = rightFreq;
@@ -126,14 +130,12 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       await natureAudioRef.current.play();
       console.log('🌊 Sonido:', soundType);
     } catch (err) {
-      console.warn('No se cargó sonido de naturaleza:', err);
+      console.warn('No se cargó sonido:', err);
     }
   };
 
-  // FUNCIÓN DE PAUSA/REPRODUCCIÓN CORREGIDA
   const togglePlayPause = () => {
     if (isPlaying) {
-      // PAUSAR - Muteamos el master gain, NO desconectamos
       console.log('⏸ Pausando...');
       
       if (masterGainRef.current) {
@@ -152,7 +154,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       setIsPlaying(false);
       
     } else {
-      // REPRODUCIR - Restauramos el gain y reanudamos
       console.log('▶ Reproduciendo...');
       
       if (masterGainRef.current && audioContextRef.current) {
@@ -164,17 +165,13 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
         natureAudioRef.current.play();
       }
       
-      // Reanudar timer desde donde quedó
       resumeTimer();
-      
       setIsPlaying(true);
     }
   };
 
   const startTimer = (durationMinutes) => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current);
     
     const durationSeconds = durationMinutes * 60;
     startTimeRef.current = Date.now() - (pausedTimeRef.current * 1000);
@@ -185,16 +182,12 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       
       setCurrentTime(elapsed);
       
-      if (remaining <= 0) {
-        handleComplete();
-      }
+      if (remaining <= 0) handleComplete();
     }, 1000);
   };
 
   const resumeTimer = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current);
     
     const durationSeconds = (routine?.duration || 20) * 60;
     startTimeRef.current = Date.now() - (currentTime * 1000);
@@ -205,9 +198,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       
       setCurrentTime(elapsed);
       
-      if (remaining <= 0) {
-        handleComplete();
-      }
+      if (remaining <= 0) handleComplete();
     }, 1000);
   };
 
@@ -217,9 +208,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   };
 
   const cleanup = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current);
     
     oscillatorsRef.current.forEach(osc => {
       try {
@@ -292,14 +281,14 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
           <span className="freq-value">
             {profile?.id?.includes('solfeggio') 
               ? `${profile.carrierFreq || 528} Hz`
-              : `${profile?.defaultBeatFreq || routine?.beatFreq || 10} Hz`
+              : `${profile.defaultBeatFreq || 10} Hz`
             }
           </span>
           <span className="freq-type">{profile?.brainwave || 'Alpha'}</span>
         </div>
         <div className="freq-box">
           <span className="freq-label">Sonido</span>
-          <span className="freq-value">{profile?.natureSound || routine?.natureSound || 'Arroyo'}</span>
+          <span className="freq-value">{profile?.natureSound || 'Arroyo'}</span>
         </div>
         <div className="freq-box">
           <span className="freq-label">Duración</span>
@@ -321,10 +310,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
         <button className="control-btn stop" onClick={handleComplete}>
           ⏹ Detener
         </button>
-        <button 
-          className="control-btn pause" 
-          onClick={togglePlayPause}
-        >
+        <button className="control-btn pause" onClick={togglePlayPause}>
           {isPlaying ? '⏸ Pausar' : '▶ Reproducir'}
         </button>
       </div>

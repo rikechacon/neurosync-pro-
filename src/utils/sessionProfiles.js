@@ -5,13 +5,12 @@ export const PROFILES = {
   delta: {
     id: 'delta',
     name: 'Sueño Profundo',
-    category: 'relax',
+    category: 'sleep',
     brainwave: 'Delta',
+    baseFreq: 2,
     freqRange: [0.5, 4],
-    defaultBeatFreq: 2,
     carrierFreq: 200,
     description: 'Regeneración celular, sueño sin sueños',
-    benefits: ['Sueño reparador', 'Regeneración física', 'Liberación de hormonas'],
     natureSound: 'rain',
     recommendedDuration: 30
   },
@@ -21,11 +20,10 @@ export const PROFILES = {
     name: 'Meditación Profunda',
     category: 'meditation',
     brainwave: 'Theta',
+    baseFreq: 6,
     freqRange: [4, 8],
-    defaultBeatFreq: 6,
     carrierFreq: 250,
-    description: 'Meditación profunda, creatividad, intuición',
-    benefits: ['Creatividad', 'Intuición', 'Relajación profunda'],
+    description: 'Meditación profunda, creatividad',
     natureSound: 'ocean',
     recommendedDuration: 20
   },
@@ -35,11 +33,10 @@ export const PROFILES = {
     name: 'Relajación Activa',
     category: 'relax',
     brainwave: 'Alpha',
+    baseFreq: 10,
     freqRange: [8, 13],
-    defaultBeatFreq: 10,
     carrierFreq: 300,
-    description: 'Relajación consciente, reducción de estrés',
-    benefits: ['Calma mental', 'Reducción de ansiedad', 'Equilibrio emocional'],
+    description: 'Relajación consciente',
     natureSound: 'stream',
     recommendedDuration: 15
   },
@@ -49,11 +46,10 @@ export const PROFILES = {
     name: 'Concentración Relajada',
     category: 'focus',
     brainwave: 'Alpha',
+    baseFreq: 12,
     freqRange: [10, 13],
-    defaultBeatFreq: 12,
     carrierFreq: 350,
-    description: 'Enfoque suave, aprendizaje',
-    benefits: ['Concentración', 'Aprendizaje', 'Memoria'],
+    description: 'Enfoque suave',
     natureSound: 'birds',
     recommendedDuration: 25
   },
@@ -63,11 +59,10 @@ export const PROFILES = {
     name: 'Enfoque Activo',
     category: 'focus',
     brainwave: 'Beta Bajo',
+    baseFreq: 15,
     freqRange: [13, 18],
-    defaultBeatFreq: 15,
     carrierFreq: 400,
-    description: 'Concentración activa, pensamiento lógico',
-    benefits: ['Atención sostenida', 'Razonamiento', 'Productividad'],
+    description: 'Concentración activa',
     natureSound: 'stream',
     recommendedDuration: 30
   },
@@ -77,11 +72,10 @@ export const PROFILES = {
     name: 'Energía Mental',
     category: 'energy',
     brainwave: 'Beta',
+    baseFreq: 20,
     freqRange: [18, 25],
-    defaultBeatFreq: 20,
     carrierFreq: 450,
-    description: 'Alerta máxima, energía, acción',
-    benefits: ['Energía', 'Motivación', 'Acción'],
+    description: 'Alerta máxima, energía',
     natureSound: 'birds',
     recommendedDuration: 20
   },
@@ -91,11 +85,10 @@ export const PROFILES = {
     name: 'Conciencia Superior',
     category: 'meditation',
     brainwave: 'Gamma',
+    baseFreq: 30,
     freqRange: [25, 40],
-    defaultBeatFreq: 30,
     carrierFreq: 500,
     description: 'Procesamiento cognitivo superior',
-    benefits: ['Insights', 'Comprensión profunda', 'Conciencia expandida'],
     natureSound: 'ocean',
     recommendedDuration: 15
   },
@@ -106,11 +99,9 @@ export const PROFILES = {
     name: 'Liberación de Miedos',
     category: 'healing',
     brainwave: 'Solfeggio 396 Hz',
-    freqRange: [396, 396],
-    defaultBeatFreq: 0,
+    baseFreq: 0,
     carrierFreq: 396,
     description: 'Liberación de culpa y miedo',
-    benefits: ['Liberar traumas', 'Transformar culpa', 'Sanar miedos'],
     natureSound: 'rain',
     recommendedDuration: 20
   },
@@ -120,11 +111,9 @@ export const PROFILES = {
     name: 'Cambio y Transformación',
     category: 'healing',
     brainwave: 'Solfeggio 417 Hz',
-    freqRange: [417, 417],
-    defaultBeatFreq: 0,
+    baseFreq: 0,
     carrierFreq: 417,
-    description: 'Facilita el cambio y deshace situaciones',
-    benefits: ['Cambio positivo', 'Romper patrones', 'Nuevos comienzos'],
+    description: 'Facilita el cambio',
     natureSound: 'stream',
     recommendedDuration: 20
   },
@@ -134,11 +123,9 @@ export const PROFILES = {
     name: 'Reparación y Milagros',
     category: 'healing',
     brainwave: 'Solfeggio 528 Hz',
-    freqRange: [528, 528],
-    defaultBeatFreq: 0,
+    baseFreq: 0,
     carrierFreq: 528,
-    description: 'Transformación y milagros, reparación ADN',
-    benefits: ['Sanación profunda', 'Reparación celular', 'Transformación'],
+    description: 'Transformación y milagros',
     natureSound: 'ocean',
     recommendedDuration: 30
   },
@@ -148,11 +135,9 @@ export const PROFILES = {
     name: 'Conexión y Relaciones',
     category: 'healing',
     brainwave: 'Solfeggio 639 Hz',
-    freqRange: [639, 639],
-    defaultBeatFreq: 0,
+    baseFreq: 0,
     carrierFreq: 639,
-    description: 'Conexión, relaciones armoniosas',
-    benefits: ['Armonía relacional', 'Comunicación', 'Amor'],
+    description: 'Conexión, relaciones',
     natureSound: 'birds',
     recommendedDuration: 20
   },
@@ -162,11 +147,9 @@ export const PROFILES = {
     name: 'Expresión y Soluciones',
     category: 'healing',
     brainwave: 'Solfeggio 741 Hz',
-    freqRange: [741, 741],
-    defaultBeatFreq: 0,
+    baseFreq: 0,
     carrierFreq: 741,
-    description: 'Expresión, soluciones, limpieza',
-    benefits: ['Claridad mental', 'Expresión creativa', 'Limpieza energética'],
+    description: 'Expresión, claridad',
     natureSound: 'stream',
     recommendedDuration: 20
   },
@@ -176,11 +159,9 @@ export const PROFILES = {
     name: 'Intuición Despierta',
     category: 'meditation',
     brainwave: 'Solfeggio 852 Hz',
-    freqRange: [852, 852],
-    defaultBeatFreq: 0,
+    baseFreq: 0,
     carrierFreq: 852,
-    description: 'Despertar intuición, volver al orden espiritual',
-    benefits: ['Intuición', 'Conciencia espiritual', 'Claridad'],
+    description: 'Despertar intuición',
     natureSound: 'ocean',
     recommendedDuration: 25
   },
@@ -190,11 +171,9 @@ export const PROFILES = {
     name: 'Conexión Divina',
     category: 'meditation',
     brainwave: 'Solfeggio 963 Hz',
-    freqRange: [963, 963],
-    defaultBeatFreq: 0,
+    baseFreq: 0,
     carrierFreq: 963,
-    description: 'Conexión con la fuente, frecuencia de los dioses',
-    benefits: ['Conexión divina', 'Unidad', 'Iluminación'],
+    description: 'Conexión con la fuente',
     natureSound: 'rain',
     recommendedDuration: 30
   },
@@ -204,65 +183,56 @@ export const PROFILES = {
     name: 'Conexión Tierra',
     category: 'healing',
     brainwave: 'Schumann 7.83 Hz',
-    freqRange: [7.83, 7.83],
-    defaultBeatFreq: 7.83,
+    baseFreq: 7.83,
     carrierFreq: 200,
-    description: 'Resonancia fundamental de la Tierra',
-    benefits: ['Conexión con la Tierra', 'Equilibrio', 'Grounding'],
+    description: 'Resonancia de la Tierra',
     natureSound: 'ocean',
     recommendedDuration: 20
   }
 };
 
-// CATEGORÍAS PRINCIPALES
+// CATEGORÍAS
 export const CATEGORIES = {
   relax: {
     id: 'relax',
     name: 'Relajación',
     icon: '🌙',
-    description: 'Reduce estrés y ansiedad',
     profiles: ['alpha', 'theta', 'delta']
   },
   healing: {
     id: 'healing',
     name: 'Sanación',
     icon: '🌸',
-    description: 'Frecuencias terapéuticas Solfeggio',
     profiles: ['solfeggio396', 'solfeggio417', 'solfeggio528', 'solfeggio639', 'solfeggio741', 'solfeggio852', 'solfeggio963', 'schumann']
   },
   focus: {
     id: 'focus',
     name: 'Concentración',
     icon: '🎯',
-    description: 'Mejora tu enfoque mental',
     profiles: ['alphaFocus', 'lowBeta']
   },
   energy: {
     id: 'energy',
     name: 'Energía',
     icon: '⚡',
-    description: 'Aumenta tu vitalidad',
     profiles: ['beta', 'gamma']
   },
   meditation: {
     id: 'meditation',
     name: 'Meditación',
     icon: '🧘',
-    description: 'Profundiza tu práctica',
     profiles: ['theta', 'gamma', 'solfeggio852', 'solfeggio963']
   },
   sleep: {
     id: 'sleep',
     name: 'Sueño Profundo',
     icon: '😴',
-    description: 'Duerme mejor y más profundo',
     profiles: ['delta', 'theta']
   },
   creativity: {
     id: 'creativity',
     name: 'Creatividad',
     icon: '🎨',
-    description: 'Despierta tu creatividad',
     profiles: ['gamma', 'theta']
   }
 };
@@ -272,25 +242,13 @@ export const getProfileById = (profileId) => {
   return PROFILES[profileId] || PROFILES.alpha;
 };
 
-// Obtener perfiles por categoría
-export const getProfilesByCategory = (categoryId) => {
-  const category = CATEGORIES[categoryId];
-  if (!category) return [];
-  
-  return category.profiles.map(profileId => PROFILES[profileId]).filter(Boolean);
-};
-
-// Obtener perfil basado en respuestas del cuestionario
+// Obtener perfil basado en respuestas - CON AJUSTE DE INTENSIDAD
 export const getSessionProfile = (answers) => {
-  const { goal } = answers || {};
+  const { goal, intensity } = answers || {};
   
-  // Si el goal es una frecuencia Solfeggio, devolver ese perfil directamente
-  if (goal && goal.startsWith('solfeggio')) {
+  // Si es Solfeggio, devolver directamente
+  if (goal && (goal.startsWith('solfeggio') || goal === 'schumann')) {
     return PROFILES[goal] || PROFILES.alpha;
-  }
-  
-  if (goal === 'schumann') {
-    return PROFILES.schumann;
   }
   
   // Mapeo de objetivos a perfiles
@@ -305,10 +263,54 @@ export const getSessionProfile = (answers) => {
   };
   
   const profileId = goalToProfile[goal] || 'alpha';
-  return PROFILES[profileId] || PROFILES.alpha;
+  const profile = PROFILES[profileId];
+  
+  // AJUSTAR FRECUENCIA SEGÚN INTENSIDAD
+  let adjustedProfile = { ...profile };
+  let beatFreqAdjustment = 0;
+  
+  switch(intensity) {
+    case 'gentle':
+      // Suave: reducir 2-3 Hz
+      beatFreqAdjustment = -2;
+      break;
+    case 'moderate':
+      // Moderada: sin cambio
+      beatFreqAdjustment = 0;
+      break;
+    case 'strong':
+      // Intensa: aumentar 2-4 Hz
+      beatFreqAdjustment = 3;
+      break;
+    case 'extreme':
+      // Máxima: aumentar 4-6 Hz
+      beatFreqAdjustment = 5;
+      break;
+    default:
+      beatFreqAdjustment = 0;
+  }
+  
+  // Aplicar ajuste (solo para beats binaurales, no Solfeggio)
+  if (profile.baseFreq > 0) {
+    adjustedProfile.defaultBeatFreq = Math.max(
+      profile.freqRange[0],
+      Math.min(profile.freqRange[1], profile.baseFreq + beatFreqAdjustment)
+    );
+  } else {
+    adjustedProfile.defaultBeatFreq = profile.baseFreq;
+  }
+  
+  console.log('📊 Perfil ajustado:', {
+    original: profile.baseFreq,
+    intensity,
+    adjustment: beatFreqAdjustment,
+    final: adjustedProfile.defaultBeatFreq
+  });
+  
+  return adjustedProfile;
 };
 
-// Calcular duración óptima
+// Calcular duración
 export const calculateOptimalDuration = (profile, answers) => {
   const { time } = answers || {};
   
@@ -324,7 +326,6 @@ export default {
   PROFILES,
   CATEGORIES,
   getProfileById,
-  getProfilesByCategory,
   getSessionProfile,
   calculateOptimalDuration
 };
