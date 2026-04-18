@@ -93,14 +93,15 @@ export const PROFILES = {
     recommendedDuration: 15
   },
   
-  // FRECUENCIAS SOLFEGGIO
+  // FRECUENCIAS SOLFEGGIO (NO AJUSTAR POR INTENSIDAD)
   solfeggio396: {
     id: 'solfeggio396',
     name: 'Liberación de Miedos',
     category: 'healing',
     brainwave: 'Solfeggio 396 Hz',
-    baseFreq: 0,
+    baseFreq: 396,
     carrierFreq: 396,
+    isFixed: true, // NO ajustar
     description: 'Liberación de culpa y miedo',
     natureSound: 'rain',
     recommendedDuration: 20
@@ -111,8 +112,9 @@ export const PROFILES = {
     name: 'Cambio y Transformación',
     category: 'healing',
     brainwave: 'Solfeggio 417 Hz',
-    baseFreq: 0,
+    baseFreq: 417,
     carrierFreq: 417,
+    isFixed: true,
     description: 'Facilita el cambio',
     natureSound: 'stream',
     recommendedDuration: 20
@@ -123,8 +125,9 @@ export const PROFILES = {
     name: 'Reparación y Milagros',
     category: 'healing',
     brainwave: 'Solfeggio 528 Hz',
-    baseFreq: 0,
+    baseFreq: 528,
     carrierFreq: 528,
+    isFixed: true,
     description: 'Transformación y milagros',
     natureSound: 'ocean',
     recommendedDuration: 30
@@ -135,8 +138,9 @@ export const PROFILES = {
     name: 'Conexión y Relaciones',
     category: 'healing',
     brainwave: 'Solfeggio 639 Hz',
-    baseFreq: 0,
+    baseFreq: 639,
     carrierFreq: 639,
+    isFixed: true,
     description: 'Conexión, relaciones',
     natureSound: 'birds',
     recommendedDuration: 20
@@ -147,8 +151,9 @@ export const PROFILES = {
     name: 'Expresión y Soluciones',
     category: 'healing',
     brainwave: 'Solfeggio 741 Hz',
-    baseFreq: 0,
+    baseFreq: 741,
     carrierFreq: 741,
+    isFixed: true,
     description: 'Expresión, claridad',
     natureSound: 'stream',
     recommendedDuration: 20
@@ -159,8 +164,9 @@ export const PROFILES = {
     name: 'Intuición Despierta',
     category: 'meditation',
     brainwave: 'Solfeggio 852 Hz',
-    baseFreq: 0,
+    baseFreq: 852,
     carrierFreq: 852,
+    isFixed: true,
     description: 'Despertar intuición',
     natureSound: 'ocean',
     recommendedDuration: 25
@@ -171,8 +177,9 @@ export const PROFILES = {
     name: 'Conexión Divina',
     category: 'meditation',
     brainwave: 'Solfeggio 963 Hz',
-    baseFreq: 0,
+    baseFreq: 963,
     carrierFreq: 963,
+    isFixed: true,
     description: 'Conexión con la fuente',
     natureSound: 'rain',
     recommendedDuration: 30
@@ -184,7 +191,9 @@ export const PROFILES = {
     category: 'healing',
     brainwave: 'Schumann 7.83 Hz',
     baseFreq: 7.83,
+    freqRange: [7.83, 7.83], // FIJO
     carrierFreq: 200,
+    isFixed: true, // NO ajustar por intensidad
     description: 'Resonancia de la Tierra',
     natureSound: 'ocean',
     recommendedDuration: 20
@@ -242,13 +251,19 @@ export const getProfileById = (profileId) => {
   return PROFILES[profileId] || PROFILES.alpha;
 };
 
-// Obtener perfil basado en respuestas - CON AJUSTE DE INTENSIDAD
+// Obtener perfil basado en respuestas - SIN AJUSTAR SOLFEGGIO/SCHUMANN
 export const getSessionProfile = (answers) => {
   const { goal, intensity } = answers || {};
   
-  // Si es Solfeggio, devolver directamente
+  // Si es Solfeggio o Schumann, devolver DIRECTAMENTE (sin ajustes)
   if (goal && (goal.startsWith('solfeggio') || goal === 'schumann')) {
-    return PROFILES[goal] || PROFILES.alpha;
+    const profile = PROFILES[goal];
+    console.log('🔒 Perfil fijo (sin ajuste):', {
+      id: goal,
+      frequency: profile.baseFreq,
+      intensity: intensity
+    });
+    return { ...profile, defaultBeatFreq: profile.baseFreq };
   }
   
   // Mapeo de objetivos a perfiles
@@ -265,33 +280,29 @@ export const getSessionProfile = (answers) => {
   const profileId = goalToProfile[goal] || 'alpha';
   const profile = PROFILES[profileId];
   
-  // AJUSTAR FRECUENCIA SEGÚN INTENSIDAD
+  // AJUSTAR FRECUENCIA SEGÚN INTENSIDAD (solo para ondas cerebrales)
   let adjustedProfile = { ...profile };
   let beatFreqAdjustment = 0;
   
   switch(intensity) {
     case 'gentle':
-      // Suave: reducir 2-3 Hz
       beatFreqAdjustment = -2;
       break;
     case 'moderate':
-      // Moderada: sin cambio
       beatFreqAdjustment = 0;
       break;
     case 'strong':
-      // Intensa: aumentar 2-4 Hz
       beatFreqAdjustment = 3;
       break;
     case 'extreme':
-      // Máxima: aumentar 4-6 Hz
       beatFreqAdjustment = 5;
       break;
     default:
       beatFreqAdjustment = 0;
   }
   
-  // Aplicar ajuste (solo para beats binaurales, no Solfeggio)
-  if (profile.baseFreq > 0) {
+  // Aplicar ajuste (solo si NO es fijo)
+  if (!profile.isFixed && profile.baseFreq > 0) {
     adjustedProfile.defaultBeatFreq = Math.max(
       profile.freqRange[0],
       Math.min(profile.freqRange[1], profile.baseFreq + beatFreqAdjustment)

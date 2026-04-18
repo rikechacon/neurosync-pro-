@@ -7,6 +7,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const [volume, setVolume] = useState({ beats: 0.1, nature: 1.0 });
   const [error, setError] = useState(null);
   const [displayFreq, setDisplayFreq] = useState(null);
+  const [isRamping, setIsRamping] = useState(false);
   
   const audioContextRef = useRef(null);
   const oscillatorsRef = useRef([]);
@@ -14,9 +15,9 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const masterGainRef = useRef(null);
   const natureAudioRef = useRef(null);
   const intervalRef = useRef(null);
+  const freqRampRef = useRef(null);
   const startTimeRef = useRef(0);
   const pausedTimeRef = useRef(0);
-  const freqRampRef = useRef(null);
 
   const validateNumber = (value, defaultValue = 0, min = 0, max = 1000) => {
     const num = parseFloat(value);
@@ -53,16 +54,17 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       masterGainRef.current.gain.value = 1;
       masterGainRef.current.connect(audioContextRef.current.destination);
       
-      // Schumann y Solfeggio usan binaural beats CON rampa
+      // Schumann y Solfeggio usan rampa
       const useRamp = profile.id === 'schumann' || profile.id?.includes('solfeggio');
       
       if (useRamp) {
-        // Para Schumann: beatFreq = 7.83 Hz, carrierFreq = 200 Hz
-        await createBinauralBeatWithRamp(carrierFreq, beatFreq, useRamp);
-        setDisplayFreq(beatFreq);
+        await createBinauralBeatWithRamp(carrierFreq, beatFreq);
+        setDisplayFreq(beatFreq * 1.2); // Frecuencia inicial de la rampa
+        setIsRamping(true);
       } else {
         await createBinauralBeat(carrierFreq, beatFreq);
         setDisplayFreq(beatFreq);
+        setIsRamping(false);
       }
       
       await loadNatureSound(profile.natureSound || 'stream');
@@ -77,15 +79,13 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     }
   };
 
-  // NUEVA FUNCIÓN: Binaural con rampa de frecuencia
-  const createBinauralBeatWithRamp = async (carrierFreq, targetBeatFreq, useRamp) => {
+  const createBinauralBeatWithRamp = async (carrierFreq, targetBeatFreq) => {
     if (!audioContextRef.current) return;
 
     const ctx = audioContextRef.current;
     
-    // Frecuencia inicial del beat (20% más alta para la rampa)
     const startBeatFreq = targetBeatFreq * 1.2;
-    const rampDuration = 15; // segundos
+    const rampDuration = 15;
     
     console.log('🌊 Rampa binaural:', {
       beatInicio: startBeatFreq.toFixed(2),
@@ -94,25 +94,20 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       duracion: rampDuration
     });
 
-    // Calcular frecuencias iniciales
     const startLeft = carrierFreq - startBeatFreq / 2;
     const startRight = carrierFreq + startBeatFreq / 2;
+    const targetLeft = carrierFreq - targetBeatFreq / 2;
+    const targetRight = carrierFreq + targetBeatFreq / 2;
 
     // Oscilador izquierdo
     const oscLeft = ctx.createOscillator();
     const gainLeft = ctx.createGain();
     oscLeft.frequency.value = startLeft;
     oscLeft.type = 'sine';
-    
-    // Rampa para el izquierdo
-    if (useRamp) {
-      const targetLeft = carrierFreq - targetBeatFreq / 2;
-      oscLeft.frequency.exponentialRampToValueAtTime(
-        targetLeft,
-        ctx.currentTime + rampDuration
-      );
-    }
-    
+    oscLeft.frequency.exponentialRampToValueAtTime(
+      targetLeft,
+      ctx.currentTime + rampDuration
+    );
     gainLeft.gain.value = volume.beats;
     oscLeft.connect(gainLeft);
     gainLeft.connect(masterGainRef.current);
@@ -123,16 +118,10 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     const gainRight = ctx.createGain();
     oscRight.frequency.value = startRight;
     oscRight.type = 'sine';
-    
-    // Rampa para el derecho
-    if (useRamp) {
-      const targetRight = carrierFreq + targetBeatFreq / 2;
-      oscRight.frequency.exponentialRampToValueAtTime(
-        targetRight,
-        ctx.currentTime + rampDuration
-      );
-    }
-    
+    oscRight.frequency.exponentialRampToValueAtTime(
+      targetRight,
+      ctx.currentTime + rampDuration
+    );
     gainRight.gain.value = volume.beats;
     oscRight.connect(gainRight);
     gainRight.connect(masterGainRef.current);
@@ -142,21 +131,29 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     gainNodesRef.current = { left: gainLeft, right: gainRight, master: masterGainRef.current };
 
     // Actualizar display durante la rampa
-    if (useRamp && freqRampRef.current) {
-      clearInterval(freqRampRef.current);
-    }
+    let currentBeat = startBeatFreq;
+    const rampStartTime = Date.now();
     
-    if (useRamp) {
-      let currentBeat = startBeatFreq;
-      freqRampRef.current = setInterval(() => {
-        currentBeat = currentBeat * 0.985; // Reducir gradualmente
-        if (currentBeat <= targetBeatFreq + 0.01) {
-          currentBeat = targetBeatFreq;
+    freqRampRef.current = setInterval(() => {
+      const elapsed = (Date.now() - rampStartTime) / 1000;
+      const progress = Math.min(elapsed / rampDuration, 1);
+      
+      // Interpolación exponencial suave
+      currentBeat = startBeatFreq * Math.pow(targetBeatFreq / startBeatFreq, progress);
+      
+      setDisplayFreq(currentBeat);
+      
+      // Cuando completa la rampa
+      if (progress >= 0.99) {
+        setDisplayFreq(targetBeatFreq);
+        setIsRamping(false);
+        if (freqRampRef.current) {
           clearInterval(freqRampRef.current);
+          freqRampRef.current = null;
         }
-        setDisplayFreq(currentBeat);
-      }, 500);
-    }
+        console.log('✅ Rampa completada:', targetBeatFreq, 'Hz');
+      }
+    }, 100);
   };
 
   const createBinauralBeat = async (carrierFreq, beatFreq) => {
@@ -226,10 +223,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
         clearInterval(intervalRef.current);
       }
       
-      if (freqRampRef.current) {
-        clearInterval(freqRampRef.current);
-      }
-      
       setIsPlaying(false);
       
     } else {
@@ -287,8 +280,14 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   };
 
   const cleanup = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (freqRampRef.current) clearInterval(freqRampRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (freqRampRef.current) {
+      clearInterval(freqRampRef.current);
+      freqRampRef.current = null;
+    }
     
     oscillatorsRef.current.forEach(osc => {
       try {
@@ -311,6 +310,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     gainNodesRef.current = {};
     masterGainRef.current = null;
     setIsPlaying(false);
+    setIsRamping(false);
   };
 
   const handleVolumeChange = (type, value) => {
@@ -346,9 +346,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const totalMinutes = Math.floor(durationSeconds / 60);
   const totalSeconds = durationSeconds % 60;
 
-  // Frecuencia a mostrar (beat frequency, no carrier)
   const freqToShow = displayFreq || profile?.defaultBeatFreq || 10;
-  const isRamping = freqRampRef.current !== null && freqToShow > (profile?.defaultBeatFreq || 7.83) + 0.1;
 
   return (
     <div className="audio-player-container">
