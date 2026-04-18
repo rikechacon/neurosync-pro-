@@ -1,355 +1,342 @@
-/**
- * Perfiles Inteligentes de Sesión
- * Ajusta automáticamente: fade in/out, volumen, frecuencia, naturaleza
- * Basado en: nivel de estrés, calidad de sueño, objetivo
- */
+// PERFILES DE SESIÓN CON FRECUENCIAS ESPECÍFICAS
 
-export const SESSION_PROFILES = {
-  // ============================================
-  // PERFIL 1: ESTRÉS MUY ALTO (8-10)
-  // ============================================
-  HIGH_STRESS_RELAX: {
-    id: 'high_stress_relax',
-    name: 'Relajación Profunda Progresiva',
-    condition: (answers) => answers.stress_level >= 8 && answers.goal !== 'sleep',
-    
-    // Fade in muy gradual (2 minutos)
-    fadeIn: {
-      enabled: true,
-      duration: 120,  // 2 minutos
-      initialVolume: 0.02,
-      targetVolume: 0.20
-    },
-    
-    // Fade out suave
-    fadeOut: {
-      enabled: true,
-      duration: 60,  // 1 minuto
-      finalVolume: 0.05
-    },
-    
-    // Progresión de frecuencia: Alpha → Theta → Delta
-    frequencyRamp: {
-      enabled: true,
-      stages: [
-        { beatFreq: 12, duration: 300, band: 'alpha', label: 'Calma inicial' },
-        { beatFreq: 8, duration: 300, band: 'alpha-theta', label: 'Relajación' },
-        { beatFreq: 6, duration: 300, band: 'theta', label: 'Relajación profunda' },
-        { beatFreq: 4, duration: 300, band: 'theta-delta', label: 'Paz mental' }
-      ]
-    },
-    
-    // Volumen de naturaleza más alto para distraer mente acelerada
-    natureVolume: {
-      initial: 0.70,
-      target: 0.60
-    },
-    
-    // Mensaje personalizado
-    message: '🌿 Sesión adaptada para estrés elevado. La frecuencia bajará gradualmente.',
-    
-    // Duración mínima recomendada
-    minDuration: 900  // 15 minutos
+export const PROFILES = {
+  // ONDAS CEREBRALES
+  delta: {
+    id: 'delta',
+    name: 'Sueño Profundo',
+    category: 'relax',
+    brainwave: 'Delta',
+    freqRange: [0.5, 4],
+    defaultBeatFreq: 2,
+    carrierFreq: 200,
+    description: 'Regeneración celular, sueño sin sueños',
+    benefits: ['Sueño reparador', 'Regeneración física', 'Liberación de hormonas'],
+    natureSound: 'rain',
+    recommendedDuration: 30
   },
-
-  // ============================================
-  // PERFIL 2: ESTRÉS ALTO (6-7)
-  // ============================================
-  MODERATE_STRESS_RELAX: {
-    id: 'moderate_stress_relax',
-    name: 'Relajación Balanceada',
-    condition: (answers) => answers.stress_level >= 6 && answers.stress_level < 8 && answers.goal !== 'sleep',
-    
-    fadeIn: {
-      enabled: true,
-      duration: 60,  // 1 minuto
-      initialVolume: 0.05,
-      targetVolume: 0.25
-    },
-    
-    fadeOut: {
-      enabled: true,
-      duration: 45,
-      finalVolume: 0.10
-    },
-    
-    frequencyRamp: {
-      enabled: true,
-      stages: [
-        { beatFreq: 10, duration: 300, band: 'alpha', label: 'Enfoque calmado' },
-        { beatFreq: 8, duration: 300, band: 'alpha', label: 'Relajación' },
-        { beatFreq: 6, duration: 300, band: 'theta', label: 'Profundidad' }
-      ]
-    },
-    
-    natureVolume: {
-      initial: 0.60,
-      target: 0.55
-    },
-    
-    message: '🍃 Sesión equilibrada para relajación progresiva.',
-    minDuration: 600  // 10 minutos
+  
+  theta: {
+    id: 'theta',
+    name: 'Meditación Profunda',
+    category: 'meditation',
+    brainwave: 'Theta',
+    freqRange: [4, 8],
+    defaultBeatFreq: 6,
+    carrierFreq: 250,
+    description: 'Meditación profunda, creatividad, intuición',
+    benefits: ['Creatividad', 'Intuición', 'Relajación profunda'],
+    natureSound: 'ocean',
+    recommendedDuration: 20
   },
-
-  // ============================================
-  // PERFIL 3: SUEÑO DEFICIENTE (1-4)
-  // ============================================
-  POOR_SLEEP_RECOVERY: {
-    id: 'poor_sleep_recovery',
-    name: 'Recuperación de Sueño Profundo',
-    condition: (answers) => answers.sleep_quality <= 4,
-    
-    fadeIn: {
-      enabled: true,
-      duration: 45,
-      initialVolume: 0.08,
-      targetVolume: 0.25
-    },
-    
-    fadeOut: {
-      enabled: true,
-      duration: 120,  // 2 minutos - muy suave para no despertar
-      finalVolume: 0.02
-    },
-    
-    frequencyRamp: {
-      enabled: true,
-      stages: [
-        { beatFreq: 8, duration: 300, band: 'alpha', label: 'Transición' },
-        { beatFreq: 6, duration: 300, band: 'theta', label: 'Relajación' },
-        { beatFreq: 4, duration: 400, band: 'theta-delta', label: 'Pre-sueño' },
-        { beatFreq: 2, duration: 500, band: 'delta', label: 'Sueño profundo' }
-      ]
-    },
-    
-    natureVolume: {
-      initial: 0.50,
-      target: 0.40
-    },
-    
-    message: '😴 Sesión diseñada para inducir sueño profundo progresivo.',
-    minDuration: 1200  // 20 minutos
+  
+  alpha: {
+    id: 'alpha',
+    name: 'Relajación Activa',
+    category: 'relax',
+    brainwave: 'Alpha',
+    freqRange: [8, 13],
+    defaultBeatFreq: 10,
+    carrierFreq: 300,
+    description: 'Relajación consciente, reducción de estrés',
+    benefits: ['Calma mental', 'Reducción de ansiedad', 'Equilibrio emocional'],
+    natureSound: 'stream',
+    recommendedDuration: 15
   },
-
-  // ============================================
-  // PERFIL 4: ENERGÍA / CONCENTRACIÓN
-  // ============================================
-  ENERGY_FOCUS: {
-    id: 'energy_focus',
-    name: 'Energía y Concentración',
-    condition: (answers) => ['focus', 'energy'].includes(answers.goal),
-    
-    fadeIn: {
-      enabled: true,
-      duration: 30,  // Rápido - necesitan energía ya
-      initialVolume: 0.10,
-      targetVolume: 0.30
-    },
-    
-    fadeOut: {
-      enabled: false  // No fade out - corte limpio
-    },
-    
-    frequencyRamp: {
-      enabled: false,  // Mantener frecuencia estable
-      stableBeatFreq: null  // Se define por el goal
-    },
-    
-    natureVolume: {
-      initial: 0.40,
-      target: 0.35
-    },
-    
-    message: '⚡ Frecuencia estable para máximo enfoque y energía.',
-    minDuration: 300  // 5 minutos
+  
+  alphaFocus: {
+    id: 'alphaFocus',
+    name: 'Concentración Relajada',
+    category: 'focus',
+    brainwave: 'Alpha',
+    freqRange: [10, 13],
+    defaultBeatFreq: 12,
+    carrierFreq: 350,
+    description: 'Enfoque suave, aprendizaje',
+    benefits: ['Concentración', 'Aprendizaje', 'Memoria'],
+    natureSound: 'birds',
+    recommendedDuration: 25
   },
-
-  // ============================================
-  // PERFIL 5: SANACIÓN / SOLFEGGIO
-  // ============================================
-  HEALING_THERAPEUTIC: {
-    id: 'healing_therapeutic',
-    name: 'Sanación Terapéutica',
-    condition: (answers) => answers.isHealing || answers.goal?.includes('solfeggio'),
-    
-    fadeIn: {
-      enabled: true,
-      duration: 60,
-      initialVolume: 0.05,
-      targetVolume: 0.20
-    },
-    
-    fadeOut: {
-      enabled: true,
-      duration: 60,
-      finalVolume: 0.05
-    },
-    
-    frequencyRamp: {
-      enabled: false,  // Frecuencia terapéutica fija
-      stableBeatFreq: null  // Se define por la frecuencia Solfeggio
-    },
-    
-    natureVolume: {
-      initial: 0.30,  // Más bajo para enfocarse en la frecuencia
-      target: 0.25
-    },
-    
-    message: '💚 Frecuencia terapéutica pura para sanación profunda.',
-    minDuration: 900  // 15 minutos
+  
+  lowBeta: {
+    id: 'lowBeta',
+    name: 'Enfoque Activo',
+    category: 'focus',
+    brainwave: 'Beta Bajo',
+    freqRange: [13, 18],
+    defaultBeatFreq: 15,
+    carrierFreq: 400,
+    description: 'Concentración activa, pensamiento lógico',
+    benefits: ['Atención sostenida', 'Razonamiento', 'Productividad'],
+    natureSound: 'stream',
+    recommendedDuration: 30
   },
-
-  // ============================================
-  // PERFIL 6: SCHUMANN
-  // ============================================
-  SCHUMANN_GROUNDING: {
-    id: 'schumann_grounding',
-    name: 'Conexión con la Tierra',
-    condition: (answers) => answers.goal?.includes('schumann'),
-    
-    fadeIn: {
-      enabled: true,
-      duration: 45,
-      initialVolume: 0.08,
-      targetVolume: 0.25
-    },
-    
-    fadeOut: {
-      enabled: true,
-      duration: 45,
-      finalVolume: 0.08
-    },
-    
-    frequencyRamp: {
-      enabled: false,  // Schumann fijo
-      stableBeatFreq: null
-    },
-    
-    natureVolume: {
-      initial: 0.50,
-      target: 0.45
-    },
-    
-    message: '🌍 Resonancia Schumann para conexión y equilibrio.',
-    minDuration: 600  // 10 minutos
+  
+  beta: {
+    id: 'beta',
+    name: 'Energía Mental',
+    category: 'energy',
+    brainwave: 'Beta',
+    freqRange: [18, 25],
+    defaultBeatFreq: 20,
+    carrierFreq: 450,
+    description: 'Alerta máxima, energía, acción',
+    benefits: ['Energía', 'Motivación', 'Acción'],
+    natureSound: 'birds',
+    recommendedDuration: 20
   },
-
-  // ============================================
-  // PERFIL 7: ESTÁNDAR (fallback)
-  // ============================================
-  STANDARD: {
-    id: 'standard',
-    name: 'Sesión Estándar',
-    condition: () => true,  // Siempre aplica como fallback
-    
-    fadeIn: {
-      enabled: true,
-      duration: 30,
-      initialVolume: 0.10,
-      targetVolume: 0.25
-    },
-    
-    fadeOut: {
-      enabled: true,
-      duration: 30,
-      finalVolume: 0.10
-    },
-    
-    frequencyRamp: {
-      enabled: false,
-      stableBeatFreq: null
-    },
-    
-    natureVolume: {
-      initial: 0.50,
-      target: 0.50
-    },
-    
-    message: '🎧 Sesión personalizada para tu bienestar.',
-    minDuration: 300  // 5 minutos
+  
+  gamma: {
+    id: 'gamma',
+    name: 'Conciencia Superior',
+    category: 'meditation',
+    brainwave: 'Gamma',
+    freqRange: [25, 40],
+    defaultBeatFreq: 30,
+    carrierFreq: 500,
+    description: 'Procesamiento cognitivo superior',
+    benefits: ['Insights', 'Comprensión profunda', 'Conciencia expandida'],
+    natureSound: 'ocean',
+    recommendedDuration: 15
+  },
+  
+  // FRECUENCIAS SOLFEGGIO
+  solfeggio396: {
+    id: 'solfeggio396',
+    name: 'Liberación de Miedos',
+    category: 'healing',
+    brainwave: 'Solfeggio 396 Hz',
+    freqRange: [0, 0],
+    defaultBeatFreq: 0,
+    carrierFreq: 396,
+    description: 'Liberación de culpa y miedo',
+    benefits: ['Liberar traumas', 'Transformar culpa', 'Sanar miedos'],
+    natureSound: 'rain',
+    recommendedDuration: 20
+  },
+  
+  solfeggio417: {
+    id: 'solfeggio417',
+    name: 'Cambio y Transformación',
+    category: 'healing',
+    brainwave: 'Solfeggio 417 Hz',
+    freqRange: [0, 0],
+    defaultBeatFreq: 0,
+    carrierFreq: 417,
+    description: 'Facilita el cambio y deshace situaciones',
+    benefits: ['Cambio positivo', 'Romper patrones', 'Nuevos comienzos'],
+    natureSound: 'stream',
+    recommendedDuration: 20
+  },
+  
+  solfeggio528: {
+    id: 'solfeggio528',
+    name: 'Reparación y Milagros',
+    category: 'healing',
+    brainwave: 'Solfeggio 528 Hz',
+    freqRange: [0, 0],
+    defaultBeatFreq: 0,
+    carrierFreq: 528,
+    description: 'Transformación y milagros, reparación ADN',
+    benefits: ['Sanación profunda', 'Reparación celular', 'Transformación'],
+    natureSound: 'ocean',
+    recommendedDuration: 30
+  },
+  
+  solfeggio639: {
+    id: 'solfeggio639',
+    name: 'Conexión y Relaciones',
+    category: 'healing',
+    brainwave: 'Solfeggio 639 Hz',
+    freqRange: [0, 0],
+    defaultBeatFreq: 0,
+    carrierFreq: 639,
+    description: 'Conexión, relaciones armoniosas',
+    benefits: ['Armonía relacional', 'Comunicación', 'Amor'],
+    natureSound: 'birds',
+    recommendedDuration: 20
+  },
+  
+  solfeggio741: {
+    id: 'solfeggio741',
+    name: 'Expresión y Soluciones',
+    category: 'healing',
+    brainwave: 'Solfeggio 741 Hz',
+    freqRange: [0, 0],
+    defaultBeatFreq: 0,
+    carrierFreq: 741,
+    description: 'Expresión, soluciones, limpieza',
+    benefits: ['Claridad mental', 'Expresión creativa', 'Limpieza energética'],
+    natureSound: 'stream',
+    recommendedDuration: 20
+  },
+  
+  solfeggio852: {
+    id: 'solfeggio852',
+    name: 'Intuición Despierta',
+    category: 'meditation',
+    brainwave: 'Solfeggio 852 Hz',
+    freqRange: [0, 0],
+    defaultBeatFreq: 0,
+    carrierFreq: 852,
+    description: 'Despertar intuición, volver al orden espiritual',
+    benefits: ['Intuición', 'Conciencia espiritual', 'Claridad'],
+    natureSound: 'ocean',
+    recommendedDuration: 25
+  },
+  
+  solfeggio963: {
+    id: 'solfeggio963',
+    name: 'Conexión Divina',
+    category: 'meditation',
+    brainwave: 'Solfeggio 963 Hz',
+    freqRange: [0, 0],
+    defaultBeatFreq: 0,
+    carrierFreq: 963,
+    description: 'Conexión con la fuente, frecuencia de los dioses',
+    benefits: ['Conexión divina', 'Unidad', 'Iluminación'],
+    natureSound: 'rain',
+    recommendedDuration: 30
+  },
+  
+  // RESONANCIA SCHUMANN
+  schumann: {
+    id: 'schumann',
+    name: 'Conexión Tierra',
+    category: 'healing',
+    brainwave: 'Schumann',
+    freqRange: [7.83, 7.83],
+    defaultBeatFreq: 7.83,
+    carrierFreq: 200,
+    description: 'Resonancia fundamental de la Tierra',
+    benefits: ['Conexión con la Tierra', 'Equilibrio', 'Grounding'],
+    natureSound: 'ocean',
+    recommendedDuration: 20
+  },
+  
+  schumannHarmonic: {
+    id: 'schumannHarmonic',
+    name: 'Armónicos Schumann',
+    category: 'healing',
+    brainwave: 'Schumann Armónico',
+    freqRange: [14.3, 14.3],
+    defaultBeatFreq: 14.3,
+    carrierFreq: 250,
+    description: 'Primer armónico de Schumann',
+    benefits: ['Equilibrio energético', 'Sincronización', 'Bienestar'],
+    natureSound: 'birds',
+    recommendedDuration: 20
   }
 };
 
-/**
- * Obtener perfil basado en las respuestas del usuario
- */
-export function getSessionProfile(answers) {
-  // Ordenar perfiles por prioridad
-  const priorityOrder = [
-    'HEALING_THERAPEUTIC',
-    'SCHUMANN_GROUNDING',
-    'POOR_SLEEP_RECOVERY',
-    'HIGH_STRESS_RELAX',
-    'MODERATE_STRESS_RELAX',
-    'ENERGY_FOCUS',
-    'STANDARD'
-  ];
+// CATEGORÍAS PRINCIPALES
+export const CATEGORIES = {
+  relax: {
+    id: 'relax',
+    name: 'Relajación',
+    icon: '🌙',
+    description: 'Reduce estrés y ansiedad',
+    profiles: ['alpha', 'theta', 'delta']
+  },
+  healing: {
+    id: 'healing',
+    name: 'Sanación',
+    icon: '🌸',
+    description: 'Frecuencias terapéuticas Solfeggio',
+    profiles: ['solfeggio396', 'solfeggio417', 'solfeggio528', 'solfeggio639', 'solfeggio741', 'solfeggio852', 'solfeggio963', 'schumann', 'schumannHarmonic']
+  },
+  focus: {
+    id: 'focus',
+    name: 'Concentración',
+    icon: '🎯',
+    description: 'Mejora tu enfoque mental',
+    profiles: ['alphaFocus', 'lowBeta']
+  },
+  energy: {
+    id: 'energy',
+    name: 'Energía',
+    icon: '⚡',
+    description: 'Aumenta tu vitalidad',
+    profiles: ['beta', 'gamma']
+  },
+  meditation: {
+    id: 'meditation',
+    name: 'Meditación',
+    icon: '🧘',
+    description: 'Profundiza tu práctica',
+    profiles: ['theta', 'gamma', 'solfeggio852', 'solfeggio963']
+  },
+  sleep: {
+    id: 'sleep',
+    name: 'Sueño Profundo',
+    icon: '😴',
+    description: 'Duerme mejor y más profundo',
+    profiles: ['delta', 'theta']
+  }
+};
 
-  for (const profileKey of priorityOrder) {
-    const profile = SESSION_PROFILES[profileKey];
-    if (profile.condition(answers)) {
-      console.log(`🧠 Perfil seleccionado: ${profile.name}`);
-      return { ...profile, answers };
-    }
-  }
+// Función para obtener perfil por ID
+export const getProfileById = (profileId) => {
+  return PROFILES[profileId] || PROFILES.alpha;
+};
 
-  return { ...SESSION_PROFILES.STANDARD, answers };
-}
+// Función para obtener perfiles por categoría
+export const getProfilesByCategory = (categoryId) => {
+  const category = CATEGORIES[categoryId];
+  if (!category) return [];
+  
+  return category.profiles.map(profileId => PROFILES[profileId]).filter(Boolean);
+};
 
-/**
- * Calcular duración óptima basada en perfil y respuestas
- */
-export function calculateOptimalDuration(profile, answers) {
-  const { stress_level, sleep_quality, goal } = answers;
+// Función para obtener perfil basado en respuestas del cuestionario
+export const getSessionProfile = (answers) => {
+  const { goal, mood, intensity } = answers || {};
   
-  // Si el usuario eligió duración, respetarla (mínimo del perfil)
-  if (answers.duration) {
-    return Math.max(answers.duration, profile.minDuration);
-  }
-  
-  // Calcular duración basada en estrés y sueño
-  let baseDuration = profile.minDuration;
-  
-  if (stress_level >= 8) {
-    baseDuration = Math.max(baseDuration, 1200);  // 20 min
-  } else if (stress_level >= 6) {
-    baseDuration = Math.max(baseDuration, 900);  // 15 min
-  }
-  
-  if (sleep_quality <= 4) {
-    baseDuration = Math.max(baseDuration, 1200);  // 20 min
-  }
-  
-  // Objetivos específicos
-  if (goal === 'sleep') {
-    baseDuration = Math.max(baseDuration, 1800);  // 30 min
-  } else if (goal === 'meditation') {
-    baseDuration = Math.max(baseDuration, 1200);  // 20 min
-  }
-  
-  return baseDuration;
-}
-
-/**
- * Obtener mensaje de bienvenida personalizado
- */
-export function getWelcomeMessage(profile, answers) {
-  const messages = {
-    HIGH_STRESS_RELAX: 'Respira profundo. Comenzaremos suavemente y bajaremos la frecuencia gradualmente.',
-    MODERATE_STRESS_RELAX: 'Tómate este tiempo para ti. La sesión te guiará hacia la relajación.',
-    POOR_SLEEP_RECOVERY: 'Prepárate para descansar. Las frecuencias te acompañarán hacia el sueño.',
-    ENERGY_FOCUS: '¡Vamos a energizar tu mente! Frecuencia estable para máximo rendimiento.',
-    HEALING_THERAPEUTIC: 'Frecuencia terapéutica pura. Relájate y permite que la sanación comience.',
-    SCHUMANN_GROUNDING: 'Conecta con la resonancia natural de la Tierra. Siente el equilibrio.',
-    STANDARD: 'Tu sesión personalizada está lista. Disfruta del momento.'
+  // Mapeo de objetivos a perfiles
+  const goalToProfile = {
+    relax: 'alpha',
+    focus: 'lowBeta',
+    sleep: 'delta',
+    energy: 'beta',
+    meditation: 'theta',
+    creativity: 'gamma',
+    healing: 'solfeggio528'
   };
   
-  return messages[profile.id] || messages.STANDARD;
-}
+  const profileId = goalToProfile[goal] || 'alpha';
+  const profile = PROFILES[profileId];
+  
+  // Ajustar según intensidad
+  let adjustedProfile = { ...profile };
+  
+  if (intensity === 'gentle') {
+    adjustedProfile.defaultBeatFreq = Math.max(0.5, profile.defaultBeatFreq - 2);
+  } else if (intensity === 'strong' || intensity === 'extreme') {
+    adjustedProfile.defaultBeatFreq = Math.min(40, profile.defaultBeatFreq + 4);
+  }
+  
+  return adjustedProfile;
+};
+
+// Función para calcular duración óptima
+export const calculateOptimalDuration = (profile, answers) => {
+  const { time } = answers || {};
+  
+  // Si el usuario especificó tiempo, usarlo
+  if (time) {
+    const minutes = parseInt(time);
+    return isNaN(minutes) ? 20 : minutes;
+  }
+  
+  // Si no, usar duración recomendada del perfil
+  return profile.recommendedDuration || 20;
+};
 
 export default {
-  SESSION_PROFILES,
+  PROFILES,
+  CATEGORIES,
+  getProfileById,
+  getProfilesByCategory,
   getSessionProfile,
-  calculateOptimalDuration,
-  getWelcomeMessage
+  calculateOptimalDuration
 };
