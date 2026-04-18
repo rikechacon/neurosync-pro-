@@ -93,6 +93,21 @@ export const PROFILES = {
     recommendedDuration: 15
   },
   
+  // FRECUENCIA 40 Hz GAMMA (Alzheimer/Memoria)
+  gamma40: {
+    id: 'gamma40',
+    name: 'Gamma 40 Hz - Memoria',
+    category: 'healing',
+    brainwave: 'Gamma 40 Hz',
+    baseFreq: 40,
+    carrierFreq: 300,
+    isFixed: true,
+    description: 'Estimulación cognitiva, Alzheimer, memoria',
+    benefits: ['Memoria', 'Neuroprotección', 'Regulación emocional'],
+    natureSound: 'ocean',
+    recommendedDuration: 30
+  },
+  
   // FRECUENCIAS SOLFEGGIO (NO AJUSTAR POR INTENSIDAD)
   solfeggio396: {
     id: 'solfeggio396',
@@ -101,7 +116,7 @@ export const PROFILES = {
     brainwave: 'Solfeggio 396 Hz',
     baseFreq: 396,
     carrierFreq: 396,
-    isFixed: true, // NO ajustar
+    isFixed: true,
     description: 'Liberación de culpa y miedo',
     natureSound: 'rain',
     recommendedDuration: 20
@@ -191,9 +206,9 @@ export const PROFILES = {
     category: 'healing',
     brainwave: 'Schumann 7.83 Hz',
     baseFreq: 7.83,
-    freqRange: [7.83, 7.83], // FIJO
+    freqRange: [7.83, 7.83],
     carrierFreq: 200,
-    isFixed: true, // NO ajustar por intensidad
+    isFixed: true,
     description: 'Resonancia de la Tierra',
     natureSound: 'ocean',
     recommendedDuration: 20
@@ -212,7 +227,7 @@ export const CATEGORIES = {
     id: 'healing',
     name: 'Sanación',
     icon: '🌸',
-    profiles: ['solfeggio396', 'solfeggio417', 'solfeggio528', 'solfeggio639', 'solfeggio741', 'solfeggio852', 'solfeggio963', 'schumann']
+    profiles: ['gamma40', 'solfeggio396', 'solfeggio417', 'solfeggio528', 'solfeggio639', 'solfeggio741', 'solfeggio852', 'solfeggio963', 'schumann']
   },
   focus: {
     id: 'focus',
@@ -251,12 +266,12 @@ export const getProfileById = (profileId) => {
   return PROFILES[profileId] || PROFILES.alpha;
 };
 
-// Obtener perfil basado en respuestas - SIN AJUSTAR SOLFEGGIO/SCHUMANN
+// Obtener perfil basado en respuestas - SIN AJUSTAR SOLFEGGIO/SCHUMANN/40Hz
 export const getSessionProfile = (answers) => {
   const { goal, intensity } = answers || {};
   
-  // Si es Solfeggio o Schumann, devolver DIRECTAMENTE (sin ajustes)
-  if (goal && (goal.startsWith('solfeggio') || goal === 'schumann')) {
+  // Si es Solfeggio, Schumann o Gamma 40Hz, devolver DIRECTAMENTE
+  if (goal && (goal.startsWith('solfeggio') || goal === 'schumann' || goal === 'gamma40')) {
     const profile = PROFILES[goal];
     console.log('🔒 Perfil fijo (sin ajuste):', {
       id: goal,

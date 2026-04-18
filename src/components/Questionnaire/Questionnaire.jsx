@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import './Questionnaire.css';
 
-// FRECUENCIAS SOLFEGGIO PARA SANACIÓN
-const SOLFEGGIO_OPTIONS = [
+// FRECUENCIAS DE SANACIÓN (Solfeggio + Gamma 40Hz + Schumann)
+const HEALING_FREQUENCIES = [
+  { value: 'gamma40', label: '40 Hz - Memoria', icon: '🧠', desc: 'Alzheimer, cognición' },
   { value: 'solfeggio396', label: '396 Hz - Liberar Miedos', icon: '🔓', desc: 'Libera culpa y traumas' },
   { value: 'solfeggio417', label: '417 Hz - Cambio', icon: '🔄', desc: 'Transforma patrones' },
   { value: 'solfeggio528', label: '528 Hz - Reparación', icon: '💚', desc: 'Sanación y milagros' },
@@ -14,6 +15,46 @@ const SOLFEGGIO_OPTIONS = [
 ];
 
 // PREGUNTAS NORMALES (sin pregunta 1 para sanación)
+const HEALING_QUESTIONS = [
+  {
+    id: 'mood',
+    question: '¿Cómo te sientes ahora mismo?',
+    type: 'single',
+    options: [
+      { value: 'stressed', label: 'Estresado/a', icon: '😰' },
+      { value: 'tired', label: 'Cansado/a', icon: '😴' },
+      { value: 'anxious', label: 'Ansioso/a', icon: '😟' },
+      { value: 'neutral', label: 'Normal', icon: '😐' },
+      { value: 'good', label: 'Bien', icon: '🙂' },
+      { value: 'great', label: 'Excelente', icon: '🤩' }
+    ]
+  },
+  {
+    id: 'time',
+    question: '¿Cuánto tiempo tienes?',
+    type: 'single',
+    options: [
+      { value: '10', label: '10 min (rápido)', icon: '⏱️' },
+      { value: '20', label: '20 min (estándar)', icon: '⏱️' },
+      { value: '30', label: '30 min (completo)', icon: '🕐' },
+      { value: '45', label: '45 min (profundo)', icon: '🕑' },
+      { value: '60', label: '60 min (inmersivo)', icon: '🕒' }
+    ]
+  },
+  {
+    id: 'intensity',
+    question: '¿Qué intensidad prefieres?',
+    type: 'single',
+    options: [
+      { value: 'gentle', label: 'Suave', icon: '🌸', desc: 'Relajación suave' },
+      { value: 'moderate', label: 'Moderada', icon: '🌊', desc: 'Equilibrada' },
+      { value: 'strong', label: 'Intensa', icon: '🌊', desc: 'Mayor potencia' },
+      { value: 'extreme', label: 'Máxima', icon: '🌊', desc: 'Máxima frecuencia' }
+    ]
+  }
+];
+
+// PREGUNTAS NORMALES (sin sanación)
 const REGULAR_QUESTIONS = [
   {
     id: 'goal',
@@ -66,57 +107,17 @@ const REGULAR_QUESTIONS = [
   }
 ];
 
-// PREGUNTAS PARA SANACIÓN (sin pregunta 1 de objetivo)
-const HEALING_QUESTIONS = [
-  {
-    id: 'mood',
-    question: '¿Cómo te sientes ahora mismo?',
-    type: 'single',
-    options: [
-      { value: 'stressed', label: 'Estresado/a', icon: '😰' },
-      { value: 'tired', label: 'Cansado/a', icon: '😴' },
-      { value: 'anxious', label: 'Ansioso/a', icon: '😟' },
-      { value: 'neutral', label: 'Normal', icon: '😐' },
-      { value: 'good', label: 'Bien', icon: '🙂' },
-      { value: 'great', label: 'Excelente', icon: '🤩' }
-    ]
-  },
-  {
-    id: 'time',
-    question: '¿Cuánto tiempo tienes?',
-    type: 'single',
-    options: [
-      { value: '10', label: '10 min (rápido)', icon: '⏱️' },
-      { value: '20', label: '20 min (estándar)', icon: '⏱️' },
-      { value: '30', label: '30 min (completo)', icon: '🕐' },
-      { value: '45', label: '45 min (profundo)', icon: '🕑' },
-      { value: '60', label: '60 min (inmersivo)', icon: '🕒' }
-    ]
-  },
-  {
-    id: 'intensity',
-    question: '¿Qué intensidad prefieres?',
-    type: 'single',
-    options: [
-      { value: 'gentle', label: 'Suave', icon: '🌸', desc: 'Relajación suave' },
-      { value: 'moderate', label: 'Moderada', icon: '🌊', desc: 'Equilibrada' },
-      { value: 'strong', label: 'Intensa', icon: '🌊', desc: 'Mayor potencia' },
-      { value: 'extreme', label: 'Máxima', icon: '🌊🌊', desc: 'Máxima frecuencia' }
-    ]
-  }
-];
-
 export default function Questionnaire({ onComplete, onBack, selectedCategory }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showSolfeggio, setShowSolfeggio] = useState(false);
-  const [solfeggioSelected, setSolfeggioSelected] = useState(null);
+  const [showHealing, setShowHealing] = useState(false);
+  const [healingSelected, setHealingSelected] = useState(null);
 
-  // Si es sanación, mostrar Solfeggio primero
+  // Si es sanación, mostrar frecuencias primero
   useEffect(() => {
     if (selectedCategory?.id === 'healing') {
-      setShowSolfeggio(true);
+      setShowHealing(true);
       setCurrentQuestion(0);
     }
   }, [selectedCategory]);
@@ -139,19 +140,19 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
     }, 300);
   };
 
-  const handleSolfeggioSelect = (value) => {
-    // Guardar frecuencia Solfeggio seleccionada
-    setSolfeggioSelected(value);
-    setShowSolfeggio(false);
-    setCurrentQuestion(0); // Empezar desde pregunta 1 de HEALING_QUESTIONS
+  const handleHealingSelect = (value) => {
+    // Guardar frecuencia seleccionada
+    setHealingSelected(value);
+    setShowHealing(false);
+    setCurrentQuestion(0);
   };
 
   const handleComplete = (finalAnswers) => {
-    // Si es sanación, agregar la frecuencia Solfeggio al goal
+    // Si es sanación, agregar la frecuencia al goal
     const routine = {
       answers: {
         ...finalAnswers,
-        goal: selectedCategory?.id === 'healing' ? solfeggioSelected : finalAnswers.goal
+        goal: selectedCategory?.id === 'healing' ? healingSelected : finalAnswers.goal
       },
       name: `Sesión ${new Date().toLocaleDateString()}`,
       createdAt: new Date().toISOString()
@@ -161,7 +162,7 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
 
   const getCurrentQuestions = () => {
     if (selectedCategory?.id === 'healing') {
-      return HEALING_QUESTIONS; // Sin pregunta de objetivo
+      return HEALING_QUESTIONS;
     }
     return REGULAR_QUESTIONS;
   };
@@ -174,8 +175,8 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
   const totalQuestions = getCurrentQuestions().length;
   const progress = totalQuestions > 0 ? ((currentQuestion + 1) / totalQuestions) * 100 : 0;
 
-  // MOSTRAR SOLFEGGIO SI ES SANACIÓN Y AÚN NO SE SELECCIONA
-  if (selectedCategory?.id === 'healing' && showSolfeggio) {
+  // MOSTRAR SELECCIÓN DE FRECUENCIAS SI ES SANACIÓN
+  if (selectedCategory?.id === 'healing' && showHealing) {
     return (
       <div className="questionnaire-container">
         <button className="back-button" onClick={onBack}>← Volver</button>
@@ -183,16 +184,15 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
         <div className="solfeggio-selection">
           <h2 className="question-title">🌸 Selecciona tu Frecuencia de Sanación</h2>
           <p className="solfeggio-intro">
-            Las frecuencias Solfeggio son tonos sagrados usados durante siglos para sanación profunda.
-            Cada frecuencia tiene un propósito específico.
+            Cada frecuencia tiene un propósito terapéutico específico. Elige la que resuene contigo.
           </p>
           
           <div className="solfeggio-grid">
-            {SOLFEGGIO_OPTIONS.map((option) => (
+            {HEALING_FREQUENCIES.map((option) => (
               <button
                 key={option.value}
                 className="solfeggio-card"
-                onClick={() => handleSolfeggioSelect(option.value)}
+                onClick={() => handleHealingSelect(option.value)}
               >
                 <span className="solfeggio-icon">{option.icon}</span>
                 <span className="solfeggio-label">{option.label}</span>
