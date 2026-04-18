@@ -6,6 +6,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState({ beats: 0.1, nature: 1.0 });
   const [error, setError] = useState(null);
+  const [currentFreq, setCurrentFreq] = useState(null);
   
   const audioContextRef = useRef(null);
   const oscillatorsRef = useRef([]);
@@ -15,6 +16,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const intervalRef = useRef(null);
   const startTimeRef = useRef(0);
   const pausedTimeRef = useRef(0);
+  const freqRampRef = useRef(null);
 
   const validateNumber = (value, defaultValue = 0, min = 0, max = 1000) => {
     const num = parseFloat(value);
@@ -33,7 +35,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
         throw new Error('Rutina o perfil no definido');
       }
 
-      // USAR defaultBeatFreq DEL PERFIL (ya ajustado por intensidad)
       const beatFreq = profile.defaultBeatFreq || 10;
       const carrierFreq = profile.carrierFreq || 300;
       const duration = routine.duration || 20;
@@ -52,10 +53,15 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       masterGainRef.current.gain.value = 1;
       masterGainRef.current.connect(audioContextRef.current.destination);
       
+      // Determinar si usa rampa de frecuencia
+      const useFreqRamp = profile.id === 'schumann' || profile.id?.includes('solfeggio');
+      
       if (profile.id?.includes('solfeggio') || profile.id === 'schumann') {
-        await createPureTone(carrierFreq);
+        await createPureTone(carrierFreq, useFreqRamp);
+        setCurrentFreq(carrierFreq);
       } else {
         await createBinauralBeat(carrierFreq, beatFreq);
+        setCurrentFreq(beatFreq);
       }
       
       await loadNatureSound(profile.natureSound || 'stream');
@@ -101,16 +107,45 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     gainNodesRef.current = { left: gainLeft, right: gainRight, master: masterGainRef.current };
   };
 
-  const createPureTone = async (frequency) => {
+  const createPureTone = async (targetFreq, useRamp = false) => {
     if (!audioContextRef.current) return;
 
     const ctx = audioContextRef.current;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     
-    osc.frequency.value = frequency;
     osc.type = 'sine';
     gain.gain.value = volume.beats;
+    
+    if (useRamp) {
+      // RAMPA DE FRECUENCIA: Comienza 20% más alto y baja suavemente
+      const startFreq = targetFreq * 1.2; // 20% más alto
+      osc.frequency.value = startFreq;
+      
+      console.log('🌊 Rampa de frecuencia:', {
+        inicio: startFreq.toFixed(2),
+        objetivo: targetFreq,
+        duracion: '15 segundos'
+      });
+      
+      // Rampa exponencial suave (mejor sonido que linear)
+      osc.frequency.exponentialRampToValueAtTime(
+        targetFreq,
+        ctx.currentTime + 15 // 15 segundos para alcanzar la frecuencia objetivo
+      );
+      
+      // Actualizar display gradualmente
+      freqRampRef.current = setInterval(() => {
+        setCurrentFreq(prev => {
+          if (prev <= targetFreq + 0.1) return targetFreq;
+          return prev * 0.98; // Reduce 2% cada actualización
+        });
+      }, 500);
+      
+    } else {
+      osc.frequency.value = targetFreq;
+      setCurrentFreq(targetFreq);
+    }
     
     osc.connect(gain);
     gain.connect(masterGainRef.current);
@@ -149,6 +184,10 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+      
+      if (freqRampRef.current) {
+        clearInterval(freqRampRef.current);
       }
       
       setIsPlaying(false);
@@ -209,6 +248,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
 
   const cleanup = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (freqRampRef.current) clearInterval(freqRampRef.current);
     
     oscillatorsRef.current.forEach(osc => {
       try {
@@ -266,6 +306,9 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const totalMinutes = Math.floor(durationSeconds / 60);
   const totalSeconds = durationSeconds % 60;
 
+  // Determinar qué frecuencia mostrar
+  const displayFreq = currentFreq || profile?.carrierFreq || profile?.defaultBeatFreq || 10;
+
   return (
     <div className="audio-player-container">
       <button className="back-button" onClick={onBack}>← Volver</button>
@@ -280,11 +323,16 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
           <span className="freq-label">Frecuencia</span>
           <span className="freq-value">
             {profile?.id?.includes('solfeggio') 
-              ? `${profile.carrierFreq || 528} Hz`
-              : `${profile.defaultBeatFreq || 10} Hz`
+              ? `${profile.carrierFreq} Hz`
+              : profile?.id === 'schumann'
+                ? `${displayFreq.toFixed(2)} Hz`
+                : `${profile?.defaultBeatFreq || 10} Hz`
             }
           </span>
           <span className="freq-type">{profile?.brainwave || 'Alpha'}</span>
+          {profile?.id === 'schumann' && currentFreq > 7.83 && (
+            <span className="freq-ramp-indicator">🌊 Bajando suavemente...</span>
+          )}
         </div>
         <div className="freq-box">
           <span className="freq-label">Sonido</span>
