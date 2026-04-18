@@ -147,3 +147,70 @@
     font-size: 2rem;
   }
 }
+
+/* SOLFEGGIO SELECTION */
+.solfeggio-selection {
+  text-align: center;
+  padding: 2rem;
+}
+
+.solfeggio-intro {
+  color: #a0a0a0;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.solfeggio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.solfeggio-card {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1));
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.solfeggio-card:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.2));
+  border-color: rgba(139, 92, 246, 0.6);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+}
+
+.solfeggio-icon {
+  font-size: 3rem;
+}
+
+.solfeggio-label {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.solfeggio-desc {
+  color: #a0a0a0;
+  font-size: 0.9rem;
+}
+
+.option-desc {
+  display: block;
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .solfeggio-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -226,14 +226,15 @@ function AuthView({ onLogin, onRegister }) {
   );
 }
 
-// CATEGORÍAS CON SANACIÓN INCLUIDA
+// 7 CATEGORÍAS - INCLUYENDO CREATIVIDAD Y SANACIÓN
 const HOME_CATEGORIES = [
   { id: 'relax', icon: '🌙', name: 'Relajación', desc: 'Reduce estrés y ansiedad' },
   { id: 'focus', icon: '🎯', name: 'Concentración', desc: 'Mejora tu enfoque mental' },
   { id: 'sleep', icon: '😴', name: 'Sueño Profundo', desc: 'Duerme mejor y más profundo' },
   { id: 'energy', icon: '⚡', name: 'Energía', desc: 'Aumenta tu vitalidad' },
   { id: 'meditation', icon: '🧘', name: 'Meditación', desc: 'Profundiza tu práctica' },
-  { id: 'healing', icon: '🌸', name: 'Sanación', desc: 'Frecuencias Solfeggio terapéuticas' }
+  { id: 'healing', icon: '🌸', name: 'Sanación', desc: 'Frecuencias Solfeggio terapéuticas' },
+  { id: 'creativity', icon: '🎨', name: 'Creatividad', desc: 'Despierta tu creatividad' }
 ];
 
 function HomeView({ onStart, user, btStatus, selectedCategory }) {
