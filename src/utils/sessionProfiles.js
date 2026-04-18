@@ -106,7 +106,7 @@ export const PROFILES = {
     name: 'Liberación de Miedos',
     category: 'healing',
     brainwave: 'Solfeggio 396 Hz',
-    freqRange: [0, 0],
+    freqRange: [396, 396],
     defaultBeatFreq: 0,
     carrierFreq: 396,
     description: 'Liberación de culpa y miedo',
@@ -120,7 +120,7 @@ export const PROFILES = {
     name: 'Cambio y Transformación',
     category: 'healing',
     brainwave: 'Solfeggio 417 Hz',
-    freqRange: [0, 0],
+    freqRange: [417, 417],
     defaultBeatFreq: 0,
     carrierFreq: 417,
     description: 'Facilita el cambio y deshace situaciones',
@@ -134,7 +134,7 @@ export const PROFILES = {
     name: 'Reparación y Milagros',
     category: 'healing',
     brainwave: 'Solfeggio 528 Hz',
-    freqRange: [0, 0],
+    freqRange: [528, 528],
     defaultBeatFreq: 0,
     carrierFreq: 528,
     description: 'Transformación y milagros, reparación ADN',
@@ -148,7 +148,7 @@ export const PROFILES = {
     name: 'Conexión y Relaciones',
     category: 'healing',
     brainwave: 'Solfeggio 639 Hz',
-    freqRange: [0, 0],
+    freqRange: [639, 639],
     defaultBeatFreq: 0,
     carrierFreq: 639,
     description: 'Conexión, relaciones armoniosas',
@@ -162,7 +162,7 @@ export const PROFILES = {
     name: 'Expresión y Soluciones',
     category: 'healing',
     brainwave: 'Solfeggio 741 Hz',
-    freqRange: [0, 0],
+    freqRange: [741, 741],
     defaultBeatFreq: 0,
     carrierFreq: 741,
     description: 'Expresión, soluciones, limpieza',
@@ -176,7 +176,7 @@ export const PROFILES = {
     name: 'Intuición Despierta',
     category: 'meditation',
     brainwave: 'Solfeggio 852 Hz',
-    freqRange: [0, 0],
+    freqRange: [852, 852],
     defaultBeatFreq: 0,
     carrierFreq: 852,
     description: 'Despertar intuición, volver al orden espiritual',
@@ -190,7 +190,7 @@ export const PROFILES = {
     name: 'Conexión Divina',
     category: 'meditation',
     brainwave: 'Solfeggio 963 Hz',
-    freqRange: [0, 0],
+    freqRange: [963, 963],
     defaultBeatFreq: 0,
     carrierFreq: 963,
     description: 'Conexión con la fuente, frecuencia de los dioses',
@@ -199,32 +199,17 @@ export const PROFILES = {
     recommendedDuration: 30
   },
   
-  // RESONANCIA SCHUMANN
   schumann: {
     id: 'schumann',
     name: 'Conexión Tierra',
     category: 'healing',
-    brainwave: 'Schumann',
+    brainwave: 'Schumann 7.83 Hz',
     freqRange: [7.83, 7.83],
     defaultBeatFreq: 7.83,
     carrierFreq: 200,
     description: 'Resonancia fundamental de la Tierra',
     benefits: ['Conexión con la Tierra', 'Equilibrio', 'Grounding'],
     natureSound: 'ocean',
-    recommendedDuration: 20
-  },
-  
-  schumannHarmonic: {
-    id: 'schumannHarmonic',
-    name: 'Armónicos Schumann',
-    category: 'healing',
-    brainwave: 'Schumann Armónico',
-    freqRange: [14.3, 14.3],
-    defaultBeatFreq: 14.3,
-    carrierFreq: 250,
-    description: 'Primer armónico de Schumann',
-    benefits: ['Equilibrio energético', 'Sincronización', 'Bienestar'],
-    natureSound: 'birds',
     recommendedDuration: 20
   }
 };
@@ -243,7 +228,7 @@ export const CATEGORIES = {
     name: 'Sanación',
     icon: '🌸',
     description: 'Frecuencias terapéuticas Solfeggio',
-    profiles: ['solfeggio396', 'solfeggio417', 'solfeggio528', 'solfeggio639', 'solfeggio741', 'solfeggio852', 'solfeggio963', 'schumann', 'schumannHarmonic']
+    profiles: ['solfeggio396', 'solfeggio417', 'solfeggio528', 'solfeggio639', 'solfeggio741', 'solfeggio852', 'solfeggio963', 'schumann']
   },
   focus: {
     id: 'focus',
@@ -272,15 +257,22 @@ export const CATEGORIES = {
     icon: '😴',
     description: 'Duerme mejor y más profundo',
     profiles: ['delta', 'theta']
+  },
+  creativity: {
+    id: 'creativity',
+    name: 'Creatividad',
+    icon: '🎨',
+    description: 'Despierta tu creatividad',
+    profiles: ['gamma', 'theta']
   }
 };
 
-// Función para obtener perfil por ID
+// Obtener perfil por ID
 export const getProfileById = (profileId) => {
   return PROFILES[profileId] || PROFILES.alpha;
 };
 
-// Función para obtener perfiles por categoría
+// Obtener perfiles por categoría
 export const getProfilesByCategory = (categoryId) => {
   const category = CATEGORIES[categoryId];
   if (!category) return [];
@@ -288,9 +280,18 @@ export const getProfilesByCategory = (categoryId) => {
   return category.profiles.map(profileId => PROFILES[profileId]).filter(Boolean);
 };
 
-// Función para obtener perfil basado en respuestas del cuestionario
+// Obtener perfil basado en respuestas del cuestionario
 export const getSessionProfile = (answers) => {
-  const { goal, mood, intensity } = answers || {};
+  const { goal } = answers || {};
+  
+  // Si el goal es una frecuencia Solfeggio, devolver ese perfil directamente
+  if (goal && goal.startsWith('solfeggio')) {
+    return PROFILES[goal] || PROFILES.alpha;
+  }
+  
+  if (goal === 'schumann') {
+    return PROFILES.schumann;
+  }
   
   // Mapeo de objetivos a perfiles
   const goalToProfile = {
@@ -304,31 +305,18 @@ export const getSessionProfile = (answers) => {
   };
   
   const profileId = goalToProfile[goal] || 'alpha';
-  const profile = PROFILES[profileId];
-  
-  // Ajustar según intensidad
-  let adjustedProfile = { ...profile };
-  
-  if (intensity === 'gentle') {
-    adjustedProfile.defaultBeatFreq = Math.max(0.5, profile.defaultBeatFreq - 2);
-  } else if (intensity === 'strong' || intensity === 'extreme') {
-    adjustedProfile.defaultBeatFreq = Math.min(40, profile.defaultBeatFreq + 4);
-  }
-  
-  return adjustedProfile;
+  return PROFILES[profileId] || PROFILES.alpha;
 };
 
-// Función para calcular duración óptima
+// Calcular duración óptima
 export const calculateOptimalDuration = (profile, answers) => {
   const { time } = answers || {};
   
-  // Si el usuario especificó tiempo, usarlo
   if (time) {
     const minutes = parseInt(time);
     return isNaN(minutes) ? 20 : minutes;
   }
   
-  // Si no, usar duración recomendada del perfil
   return profile.recommendedDuration || 20;
 };
 

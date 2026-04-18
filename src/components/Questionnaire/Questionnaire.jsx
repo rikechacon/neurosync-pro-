@@ -13,7 +13,7 @@ const SOLFEGGIO_OPTIONS = [
   { value: 'schumann', label: '7.83 Hz - Tierra', icon: '🌍', desc: 'Resonancia Schumann' }
 ];
 
-// PREGUNTAS NORMALES (no sanación)
+// PREGUNTAS NORMALES (sin pregunta 1 para sanación)
 const REGULAR_QUESTIONS = [
   {
     id: 'goal',
@@ -66,27 +66,71 @@ const REGULAR_QUESTIONS = [
   }
 ];
 
+// PREGUNTAS PARA SANACIÓN (sin pregunta 1 de objetivo)
+const HEALING_QUESTIONS = [
+  {
+    id: 'mood',
+    question: '¿Cómo te sientes ahora mismo?',
+    type: 'single',
+    options: [
+      { value: 'stressed', label: 'Estresado/a', icon: '😰' },
+      { value: 'tired', label: 'Cansado/a', icon: '😴' },
+      { value: 'anxious', label: 'Ansioso/a', icon: '😟' },
+      { value: 'neutral', label: 'Normal', icon: '😐' },
+      { value: 'good', label: 'Bien', icon: '🙂' },
+      { value: 'great', label: 'Excelente', icon: '🤩' }
+    ]
+  },
+  {
+    id: 'time',
+    question: '¿Cuánto tiempo tienes?',
+    type: 'single',
+    options: [
+      { value: '10', label: '10 min (rápido)', icon: '⏱️' },
+      { value: '20', label: '20 min (estándar)', icon: '⏱️' },
+      { value: '30', label: '30 min (completo)', icon: '🕐' },
+      { value: '45', label: '45 min (profundo)', icon: '🕑' },
+      { value: '60', label: '60 min (inmersivo)', icon: '🕒' }
+    ]
+  },
+  {
+    id: 'intensity',
+    question: '¿Qué intensidad prefieres?',
+    type: 'single',
+    options: [
+      { value: 'gentle', label: 'Suave', icon: '🌸', desc: 'Relajación suave' },
+      { value: 'moderate', label: 'Moderada', icon: '🌊', desc: 'Equilibrada' },
+      { value: 'strong', label: 'Intensa', icon: '🌊', desc: 'Mayor potencia' },
+      { value: 'extreme', label: 'Máxima', icon: '🌊🌊', desc: 'Máxima frecuencia' }
+    ]
+  }
+];
+
 export default function Questionnaire({ onComplete, onBack, selectedCategory }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showSolfeggio, setShowSolfeggio] = useState(false);
+  const [solfeggioSelected, setSolfeggioSelected] = useState(null);
 
-  // Si es sanación, mostrar primero Solfeggio
+  // Si es sanación, mostrar Solfeggio primero
   useEffect(() => {
     if (selectedCategory?.id === 'healing') {
       setShowSolfeggio(true);
+      setCurrentQuestion(0);
     }
   }, [selectedCategory]);
 
   const handleAnswer = (value) => {
     setIsTransitioning(true);
     
-    const newAnswers = { ...answers, [getCurrentQuestion().id]: value };
+    const currentQ = getCurrentQuestion();
+    const newAnswers = { ...answers, [currentQ.id]: value };
     setAnswers(newAnswers);
 
     setTimeout(() => {
-      if (currentQuestion < getCurrentQuestions().length - 1) {
+      const questions = getCurrentQuestions();
+      if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         handleComplete(newAnswers);
@@ -96,16 +140,19 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
   };
 
   const handleSolfeggioSelect = (value) => {
-    // Seleccionar frecuencia Solfeggio y saltar a siguiente pregunta
-    const newAnswers = { ...answers, goal: value };
-    setAnswers(newAnswers);
+    // Guardar frecuencia Solfeggio seleccionada
+    setSolfeggioSelected(value);
     setShowSolfeggio(false);
-    setCurrentQuestion(0); // Empezar preguntas normales desde la 0
+    setCurrentQuestion(0); // Empezar desde pregunta 1 de HEALING_QUESTIONS
   };
 
   const handleComplete = (finalAnswers) => {
+    // Si es sanación, agregar la frecuencia Solfeggio al goal
     const routine = {
-      answers: finalAnswers,
+      answers: {
+        ...finalAnswers,
+        goal: selectedCategory?.id === 'healing' ? solfeggioSelected : finalAnswers.goal
+      },
       name: `Sesión ${new Date().toLocaleDateString()}`,
       createdAt: new Date().toISOString()
     };
@@ -113,8 +160,8 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
   };
 
   const getCurrentQuestions = () => {
-    if (selectedCategory?.id === 'healing' && showSolfeggio) {
-      return []; // Mostrar Solfeggio en lugar de preguntas
+    if (selectedCategory?.id === 'healing') {
+      return HEALING_QUESTIONS; // Sin pregunta de objetivo
     }
     return REGULAR_QUESTIONS;
   };
@@ -127,7 +174,7 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
   const totalQuestions = getCurrentQuestions().length;
   const progress = totalQuestions > 0 ? ((currentQuestion + 1) / totalQuestions) * 100 : 0;
 
-  // MOSTRAR SOLFEGGIO SI ES SANACIÓN
+  // MOSTRAR SOLFEGGIO SI ES SANACIÓN Y AÚN NO SE SELECCIONA
   if (selectedCategory?.id === 'healing' && showSolfeggio) {
     return (
       <div className="questionnaire-container">
@@ -136,7 +183,8 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
         <div className="solfeggio-selection">
           <h2 className="question-title">🌸 Selecciona tu Frecuencia de Sanación</h2>
           <p className="solfeggio-intro">
-            Las frecuencias Solfeggio son tonos sagrados usados durante siglos para sanación profunda
+            Las frecuencias Solfeggio son tonos sagrados usados durante siglos para sanación profunda.
+            Cada frecuencia tiene un propósito específico.
           </p>
           
           <div className="solfeggio-grid">
@@ -159,6 +207,10 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
 
   const currentQ = getCurrentQuestion();
 
+  if (!currentQ) {
+    return <div className="loading">Cargando...</div>;
+  }
+
   return (
     <div className="questionnaire-container">
       <button className="back-button" onClick={onBack}>← Volver</button>
@@ -170,10 +222,10 @@ export default function Questionnaire({ onComplete, onBack, selectedCategory }) 
       )}
 
       <div className={`question-card ${isTransitioning ? 'fade-out' : ''}`}>
-        <h2 className="question-title">{currentQ?.question}</h2>
+        <h2 className="question-title">{currentQ.question}</h2>
         
         <div className="options-grid">
-          {currentQ?.options.map((option) => (
+          {currentQ.options.map((option) => (
             <button
               key={option.value}
               className="option-button"
