@@ -6,7 +6,7 @@ import Register from './components/Auth/Register';
 import Paywall from './components/Paywall/Paywall';
 import { authAPI, routinesAPI } from './services/api';
 import { checkBluetoothSupport } from './utils/bluetoothCheck';
-import { getSessionProfile, calculateOptimalDuration } from './utils/sessionProfiles';
+import { getSessionProfile, calculateOptimalDuration, CATEGORIES } from './utils/sessionProfiles';
 import './App.css';
 
 function App() {
@@ -67,13 +67,11 @@ function App() {
     setCurrentView('home');
   };
 
-  // NUEVO: Iniciar cuestionario con categoría pre-seleccionada
   const handleStartQuestionnaire = (category = null) => {
     setSelectedCategory(category);
     setCurrentView('questionnaire');
   };
 
-  // NUEVO: Auto-avance desde cuestionario a player
   const handleQuestionnaireComplete = async (routine) => {
     const answers = routine.answers || {};
     const profile = getSessionProfile(answers);
@@ -93,16 +91,15 @@ function App() {
       try {
         await routinesAPI.create({
           ...enhancedRoutine,
-          beatFreq: routine.beatFreq || 6,
-          carrierFreq: routine.carrierFreq || 400,
-          name: routine.name || 'Rutina Personalizada'
+          beatFreq: routine.beatFreq || profile.defaultBeatFreq || 10,
+          carrierFreq: routine.carrierFreq || profile.carrierFreq || 300,
+          name: routine.name || `Sesión ${new Date().toLocaleDateString()}`
         });
       } catch (error) {
         console.error('Error guardando rutina:', error);
       }
     }
     
-    // AUTO-avance a playing
     setCurrentView('playing');
   };
 
@@ -116,9 +113,9 @@ function App() {
           duration: currentRoutine?.duration
         });
         localStorage.setItem('completed_sessions', JSON.stringify(sessions));
-        console.log('✅ Sesión completada registrada');
+        console.log('✅ Sesión completada');
       } catch (error) {
-        console.error('Error registrando sesión:', error);
+        console.error('Error:', error);
       }
     }
     setCurrentView('home');
@@ -229,19 +226,18 @@ function AuthView({ onLogin, onRegister }) {
   );
 }
 
-// CATEGORÍAS DISPONIBLES
-const CATEGORIES = [
+// CATEGORÍAS CON SANACIÓN INCLUIDA
+const HOME_CATEGORIES = [
   { id: 'relax', icon: '🌙', name: 'Relajación', desc: 'Reduce estrés y ansiedad' },
   { id: 'focus', icon: '🎯', name: 'Concentración', desc: 'Mejora tu enfoque mental' },
   { id: 'sleep', icon: '😴', name: 'Sueño Profundo', desc: 'Duerme mejor y más profundo' },
   { id: 'energy', icon: '⚡', name: 'Energía', desc: 'Aumenta tu vitalidad' },
   { id: 'meditation', icon: '🧘', name: 'Meditación', desc: 'Profundiza tu práctica' },
-  { id: 'creativity', icon: '🎨', name: 'Creatividad', desc: 'Despierta tu creatividad' }
+  { id: 'healing', icon: '🌸', name: 'Sanación', desc: 'Frecuencias Solfeggio terapéuticas' }
 ];
 
 function HomeView({ onStart, user, btStatus, selectedCategory }) {
   const handleCategoryClick = (category) => {
-    // Click en categoría → va directo al cuestionario
     onStart(category);
   };
 
@@ -252,9 +248,8 @@ function HomeView({ onStart, user, btStatus, selectedCategory }) {
         <p>Selecciona una categoría para comenzar tu sesión personalizada</p>
       </div>
 
-      {/* GRID DE CATEGORÍAS INTERACTIVAS */}
       <div className="categories-grid">
-        {CATEGORIES.map((category) => (
+        {HOME_CATEGORIES.map((category) => (
           <div 
             key={category.id}
             className="category-card"

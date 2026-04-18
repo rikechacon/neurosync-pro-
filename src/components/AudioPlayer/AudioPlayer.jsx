@@ -12,12 +12,11 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const gainNodesRef = useRef({});
   const natureAudioRef = useRef(null);
   const intervalRef = useRef(null);
+  const isPlayingRef = useRef(false);
 
   const validateNumber = (value, defaultValue = 0, min = 0, max = 1000) => {
     const num = parseFloat(value);
-    if (isNaN(num) || !isFinite(num)) {
-      return defaultValue;
-    }
+    if (isNaN(num) || !isFinite(num)) return defaultValue;
     return Math.max(min, Math.min(max, num));
   };
 
@@ -32,37 +31,34 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
         throw new Error('Rutina o perfil no definido');
       }
 
-      // Obtener frecuencias del perfil
       const beatFreq = profile.defaultBeatFreq || routine.beatFreq || 10;
       const carrierFreq = profile.carrierFreq || routine.carrierFreq || 300;
-      const duration = routine.duration || 20; // minutos
+      const duration = routine.duration || 20;
 
       console.log('🎵 Iniciando sesión:', {
         profile: profile.name,
         beatFreq,
         carrierFreq,
-        duration,
-        brainwave: profile.brainwave
+        duration
       });
 
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       
-      // Crear beats binaurales con frecuencias correctas
-      if (profile.id.includes('solfeggio')) {
-        // Frecuencias Solfeggio - tono puro
+      if (profile.id?.includes('solfeggio')) {
         await createPureTone(carrierFreq);
       } else {
-        // Beats binaurales normales
         await createBinauralBeat(carrierFreq, beatFreq);
       }
       
       await loadNatureSound(profile.natureSound || 'stream');
       
+      // Iniciar reproducción automáticamente
       setIsPlaying(true);
+      isPlayingRef.current = true;
       startTimer(duration);
       
     } catch (err) {
-      console.error('Error iniciando sesión:', err);
+      console.error('Error:', err);
       setError(err.message);
     }
   };
@@ -71,18 +67,11 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     if (!audioContextRef.current) return;
 
     const ctx = audioContextRef.current;
-    
     const leftFreq = carrierFreq - beatFreq / 2;
     const rightFreq = carrierFreq + beatFreq / 2;
     
-    console.log('🎧 Frecuencias binaurales:', { 
-      carrier: carrierFreq, 
-      beat: beatFreq,
-      left: leftFreq, 
-      right: rightFreq 
-    });
+    console.log('🎧 Frecuencias:', { left: leftFreq, right: rightFreq });
 
-    // Canal izquierdo
     const oscLeft = ctx.createOscillator();
     const gainLeft = ctx.createGain();
     oscLeft.frequency.value = leftFreq;
@@ -92,7 +81,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     gainLeft.connect(ctx.destination);
     oscLeft.start();
 
-    // Canal derecho
     const oscRight = ctx.createOscillator();
     const gainRight = ctx.createGain();
     oscRight.frequency.value = rightFreq;
@@ -102,7 +90,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     gainRight.connect(ctx.destination);
     oscRight.start();
 
-    // Estéreo
     const merger = ctx.createChannelMerger(2);
     gainLeft.disconnect();
     gainRight.disconnect();
@@ -118,9 +105,6 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     if (!audioContextRef.current) return;
 
     const ctx = audioContextRef.current;
-    
-    console.log('🎵 Frecuencia pura:', frequency, 'Hz');
-
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     
@@ -144,15 +128,75 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       natureAudioRef.current.volume = volume.nature;
       
       await natureAudioRef.current.play();
-      console.log('🌊 Sonido de naturaleza:', soundType);
+      console.log('🌊 Sonido:', soundType);
     } catch (err) {
-      console.warn('No se pudo cargar sonido de naturaleza:', err);
+      console.warn('No se cargó sonido de naturaleza:', err);
+    }
+  };
+
+  // FUNCIÓN DE PAUSA/REPRODUCCIÓN ARREGLADA
+  const togglePlayPause = () => {
+    if (isPlayingRef.current) {
+      // PAUSAR
+      console.log('⏸ Pausando...');
+      
+      // Pausar osciladores
+      oscillatorsRef.current.forEach(osc => {
+        try {
+          // Los osciladores no se pueden pausar, solo detener
+          // Pero podemos mutear el gain
+          osc.disconnect();
+        } catch (e) {
+          console.error('Error pausando oscilador:', e);
+        }
+      });
+      
+      // Pausar audio de naturaleza
+      if (natureAudioRef.current) {
+        natureAudioRef.current.pause();
+      }
+      
+      // Detener timer
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+      
+    } else {
+      // REPRODUCIR
+      console.log('▶ Reproduciendo...');
+      
+      // Reanudar audio de naturaleza
+      if (natureAudioRef.current) {
+        natureAudioRef.current.play();
+      }
+      
+      // Reiniciar osciladores si es necesario
+      if (oscillatorsRef.current.length === 0 && audioContextRef.current) {
+        // Si no hay osciladores, necesitamos recrearlos
+        const profile = routine?.profile || 'alpha';
+        const beatFreq = 10;
+        const carrierFreq = 300;
+        createBinauralBeat(carrierFreq, beatFreq);
+      }
+      
+      // Reiniciar timer
+      startTimer(20); // Duración por defecto
+      
+      isPlayingRef.current = true;
+      setIsPlaying(true);
     }
   };
 
   const startTimer = (durationMinutes) => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
     const durationSeconds = durationMinutes * 60;
-    const startTime = Date.now();
+    const startTime = Date.now() - (currentTime * 1000);
     
     intervalRef.current = setInterval(() => {
       const elapsed = (Date.now() - startTime) / 1000;
@@ -195,6 +239,8 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     
     oscillatorsRef.current = [];
     gainNodesRef.current = {};
+    isPlayingRef.current = false;
+    setIsPlaying(false);
   };
 
   const handleVolumeChange = (type, value) => {
@@ -276,7 +322,10 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
         <button className="control-btn stop" onClick={handleComplete}>
           ⏹ Detener
         </button>
-        <button className="control-btn pause" onClick={() => setIsPlaying(!isPlaying)}>
+        <button 
+          className="control-btn pause" 
+          onClick={togglePlayPause}
+        >
           {isPlaying ? '⏸ Pausar' : '▶ Reproducir'}
         </button>
       </div>
