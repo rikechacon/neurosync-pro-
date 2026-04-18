@@ -598,3 +598,32 @@
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
+
+.ramp-container {
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.ramp-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(99, 102, 241, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.ramp-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #6366f1);
+  transition: width 0.1s linear;
+  border-radius: 10px;
+}
+
+.freq-ramp-indicator {
+  display: block;
+  font-size: 0.8rem;
+  color: #10b981;
+  margin-top: 0.5rem;
+  animation: pulse 2s infinite;
+}

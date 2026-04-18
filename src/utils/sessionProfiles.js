@@ -12,7 +12,9 @@ export const PROFILES = {
     carrierFreq: 200,
     description: 'Regeneración celular, sueño sin sueños',
     natureSound: 'rain',
-    recommendedDuration: 30
+    recommendedDuration: 30,
+    rampDuration: 60, // 60 segundos para sueño
+    rampPercent: 0.15 // 15% variación
   },
   
   theta: {
@@ -25,7 +27,9 @@ export const PROFILES = {
     carrierFreq: 250,
     description: 'Meditación profunda, creatividad',
     natureSound: 'ocean',
-    recommendedDuration: 20
+    recommendedDuration: 20,
+    rampDuration: 30,
+    rampPercent: 0.20
   },
   
   alpha: {
@@ -38,7 +42,9 @@ export const PROFILES = {
     carrierFreq: 300,
     description: 'Relajación consciente',
     natureSound: 'stream',
-    recommendedDuration: 15
+    recommendedDuration: 15,
+    rampDuration: 20,
+    rampPercent: 0.20
   },
   
   alphaFocus: {
@@ -51,7 +57,9 @@ export const PROFILES = {
     carrierFreq: 350,
     description: 'Enfoque suave',
     natureSound: 'birds',
-    recommendedDuration: 25
+    recommendedDuration: 25,
+    rampDuration: 20,
+    rampPercent: 0.20
   },
   
   lowBeta: {
@@ -64,7 +72,9 @@ export const PROFILES = {
     carrierFreq: 400,
     description: 'Concentración activa',
     natureSound: 'stream',
-    recommendedDuration: 30
+    recommendedDuration: 30,
+    rampDuration: 15,
+    rampPercent: 0.20
   },
   
   beta: {
@@ -77,7 +87,9 @@ export const PROFILES = {
     carrierFreq: 450,
     description: 'Alerta máxima, energía',
     natureSound: 'birds',
-    recommendedDuration: 20
+    recommendedDuration: 20,
+    rampDuration: 15,
+    rampPercent: 0.20
   },
   
   gamma: {
@@ -90,10 +102,12 @@ export const PROFILES = {
     carrierFreq: 500,
     description: 'Procesamiento cognitivo superior',
     natureSound: 'ocean',
-    recommendedDuration: 15
+    recommendedDuration: 15,
+    rampDuration: 30,
+    rampPercent: 0.20
   },
   
-  // FRECUENCIA 40 Hz GAMMA (Alzheimer/Memoria)
+  // GAMMA 40 Hz (Alzheimer/Memoria) - RAMP LARGO
   gamma40: {
     id: 'gamma40',
     name: 'Gamma 40 Hz - Memoria',
@@ -105,10 +119,12 @@ export const PROFILES = {
     description: 'Estimulación cognitiva, Alzheimer, memoria',
     benefits: ['Memoria', 'Neuroprotección', 'Regulación emocional'],
     natureSound: 'ocean',
-    recommendedDuration: 30
+    recommendedDuration: 30,
+    rampDuration: 60, // 60 segundos (MIT studies)
+    rampPercent: 0.25 // 25% variación inicial
   },
   
-  // FRECUENCIAS SOLFEGGIO (NO AJUSTAR POR INTENSIDAD)
+  // FRECUENCIAS SOLFEGGIO
   solfeggio396: {
     id: 'solfeggio396',
     name: 'Liberación de Miedos',
@@ -119,7 +135,9 @@ export const PROFILES = {
     isFixed: true,
     description: 'Liberación de culpa y miedo',
     natureSound: 'rain',
-    recommendedDuration: 20
+    recommendedDuration: 20,
+    rampDuration: 25,
+    rampPercent: 0.20
   },
   
   solfeggio417: {
@@ -132,7 +150,9 @@ export const PROFILES = {
     isFixed: true,
     description: 'Facilita el cambio',
     natureSound: 'stream',
-    recommendedDuration: 20
+    recommendedDuration: 20,
+    rampDuration: 25,
+    rampPercent: 0.20
   },
   
   solfeggio528: {
@@ -145,7 +165,9 @@ export const PROFILES = {
     isFixed: true,
     description: 'Transformación y milagros',
     natureSound: 'ocean',
-    recommendedDuration: 30
+    recommendedDuration: 30,
+    rampDuration: 30,
+    rampPercent: 0.20
   },
   
   solfeggio639: {
@@ -158,7 +180,9 @@ export const PROFILES = {
     isFixed: true,
     description: 'Conexión, relaciones',
     natureSound: 'birds',
-    recommendedDuration: 20
+    recommendedDuration: 20,
+    rampDuration: 25,
+    rampPercent: 0.20
   },
   
   solfeggio741: {
@@ -171,7 +195,9 @@ export const PROFILES = {
     isFixed: true,
     description: 'Expresión, claridad',
     natureSound: 'stream',
-    recommendedDuration: 20
+    recommendedDuration: 20,
+    rampDuration: 25,
+    rampPercent: 0.20
   },
   
   solfeggio852: {
@@ -184,7 +210,9 @@ export const PROFILES = {
     isFixed: true,
     description: 'Despertar intuición',
     natureSound: 'ocean',
-    recommendedDuration: 25
+    recommendedDuration: 25,
+    rampDuration: 30,
+    rampPercent: 0.20
   },
   
   solfeggio963: {
@@ -197,9 +225,12 @@ export const PROFILES = {
     isFixed: true,
     description: 'Conexión con la fuente',
     natureSound: 'rain',
-    recommendedDuration: 30
+    recommendedDuration: 30,
+    rampDuration: 30,
+    rampPercent: 0.20
   },
   
+  // SCHUMANN - RAMP CORTO (frecuencia muy baja)
   schumann: {
     id: 'schumann',
     name: 'Conexión Tierra',
@@ -211,7 +242,9 @@ export const PROFILES = {
     isFixed: true,
     description: 'Resonancia de la Tierra',
     natureSound: 'ocean',
-    recommendedDuration: 20
+    recommendedDuration: 20,
+    rampDuration: 20, // 20 segundos (frecuencia baja)
+    rampPercent: 0.20
   }
 };
 
@@ -266,17 +299,18 @@ export const getProfileById = (profileId) => {
   return PROFILES[profileId] || PROFILES.alpha;
 };
 
-// Obtener perfil basado en respuestas - SIN AJUSTAR SOLFEGGIO/SCHUMANN/40Hz
+// Obtener perfil basado en respuestas
 export const getSessionProfile = (answers) => {
   const { goal, intensity } = answers || {};
   
-  // Si es Solfeggio, Schumann o Gamma 40Hz, devolver DIRECTAMENTE
+  // Si es fijo (Solfeggio, Schumann, Gamma 40Hz), devolver directamente
   if (goal && (goal.startsWith('solfeggio') || goal === 'schumann' || goal === 'gamma40')) {
     const profile = PROFILES[goal];
-    console.log('🔒 Perfil fijo (sin ajuste):', {
+    console.log('🔒 Perfil fijo:', {
       id: goal,
       frequency: profile.baseFreq,
-      intensity: intensity
+      rampDuration: profile.rampDuration,
+      rampPercent: profile.rampPercent
     });
     return { ...profile, defaultBeatFreq: profile.baseFreq };
   }
@@ -316,7 +350,6 @@ export const getSessionProfile = (answers) => {
       beatFreqAdjustment = 0;
   }
   
-  // Aplicar ajuste (solo si NO es fijo)
   if (!profile.isFixed && profile.baseFreq > 0) {
     adjustedProfile.defaultBeatFreq = Math.max(
       profile.freqRange[0],
@@ -325,13 +358,6 @@ export const getSessionProfile = (answers) => {
   } else {
     adjustedProfile.defaultBeatFreq = profile.baseFreq;
   }
-  
-  console.log('📊 Perfil ajustado:', {
-    original: profile.baseFreq,
-    intensity,
-    adjustment: beatFreqAdjustment,
-    final: adjustedProfile.defaultBeatFreq
-  });
   
   return adjustedProfile;
 };
