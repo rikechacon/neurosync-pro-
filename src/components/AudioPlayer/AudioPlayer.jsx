@@ -10,9 +10,11 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
   const audioContextRef = useRef(null);
   const oscillatorsRef = useRef([]);
   const gainNodesRef = useRef({});
+  const masterGainRef = useRef(null);
   const natureAudioRef = useRef(null);
   const intervalRef = useRef(null);
-  const isPlayingRef = useRef(false);
+  const startTimeRef = useRef(0);
+  const pausedTimeRef = useRef(0);
 
   const validateNumber = (value, defaultValue = 0, min = 0, max = 1000) => {
     const num = parseFloat(value);
@@ -35,16 +37,16 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       const carrierFreq = profile.carrierFreq || routine.carrierFreq || 300;
       const duration = routine.duration || 20;
 
-      console.log('🎵 Iniciando sesión:', {
-        profile: profile.name,
-        beatFreq,
-        carrierFreq,
-        duration
-      });
+      console.log('🎵 Iniciando sesión:', { profile: profile.name, beatFreq, carrierFreq, duration });
 
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       
-      if (profile.id?.includes('solfeggio')) {
+      // Master gain para controlar todo el audio
+      masterGainRef.current = audioContextRef.current.createGain();
+      masterGainRef.current.gain.value = 1;
+      masterGainRef.current.connect(audioContextRef.current.destination);
+      
+      if (profile.id?.includes('solfeggio') || profile.id === 'schumann') {
         await createPureTone(carrierFreq);
       } else {
         await createBinauralBeat(carrierFreq, beatFreq);
@@ -52,9 +54,8 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
       
       await loadNatureSound(profile.natureSound || 'stream');
       
-      // Iniciar reproducción automáticamente
       setIsPlaying(true);
-      isPlayingRef.current = true;
+      startTimeRef.current = Date.now();
       startTimer(duration);
       
     } catch (err) {
@@ -70,35 +71,30 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     const leftFreq = carrierFreq - beatFreq / 2;
     const rightFreq = carrierFreq + beatFreq / 2;
     
-    console.log('🎧 Frecuencias:', { left: leftFreq, right: rightFreq });
+    console.log('🎧 Frecuencias:', { left: leftFreq, right: rightFreq, beat: beatFreq });
 
+    // Canal izquierdo
     const oscLeft = ctx.createOscillator();
     const gainLeft = ctx.createGain();
     oscLeft.frequency.value = leftFreq;
     oscLeft.type = 'sine';
     gainLeft.gain.value = volume.beats;
     oscLeft.connect(gainLeft);
-    gainLeft.connect(ctx.destination);
+    gainLeft.connect(masterGainRef.current);
     oscLeft.start();
 
+    // Canal derecho
     const oscRight = ctx.createOscillator();
     const gainRight = ctx.createGain();
     oscRight.frequency.value = rightFreq;
     oscRight.type = 'sine';
     gainRight.gain.value = volume.beats;
     oscRight.connect(gainRight);
-    gainRight.connect(ctx.destination);
+    gainRight.connect(masterGainRef.current);
     oscRight.start();
 
-    const merger = ctx.createChannelMerger(2);
-    gainLeft.disconnect();
-    gainRight.disconnect();
-    gainLeft.connect(merger, 0, 0);
-    gainRight.connect(merger, 0, 1);
-    merger.connect(ctx.destination);
-
     oscillatorsRef.current = [oscLeft, oscRight];
-    gainNodesRef.current = { left: gainLeft, right: gainRight };
+    gainNodesRef.current = { left: gainLeft, right: gainRight, master: masterGainRef.current };
   };
 
   const createPureTone = async (frequency) => {
@@ -113,11 +109,11 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     gain.gain.value = volume.beats;
     
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(masterGainRef.current);
     osc.start();
 
     oscillatorsRef.current = [osc];
-    gainNodesRef.current = { main: gain };
+    gainNodesRef.current = { main: gain, master: masterGainRef.current };
   };
 
   const loadNatureSound = async (soundType) => {
@@ -134,58 +130,43 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     }
   };
 
-  // FUNCIÓN DE PAUSA/REPRODUCCIÓN ARREGLADA
+  // FUNCIÓN DE PAUSA/REPRODUCCIÓN CORREGIDA
   const togglePlayPause = () => {
-    if (isPlayingRef.current) {
-      // PAUSAR
+    if (isPlaying) {
+      // PAUSAR - Muteamos el master gain, NO desconectamos
       console.log('⏸ Pausando...');
       
-      // Pausar osciladores
-      oscillatorsRef.current.forEach(osc => {
-        try {
-          // Los osciladores no se pueden pausar, solo detener
-          // Pero podemos mutear el gain
-          osc.disconnect();
-        } catch (e) {
-          console.error('Error pausando oscilador:', e);
-        }
-      });
-      
-      // Pausar audio de naturaleza
-      if (natureAudioRef.current) {
-        natureAudioRef.current.pause();
+      if (masterGainRef.current) {
+        masterGainRef.current.gain.setValueAtTime(0, audioContextRef.current.currentTime);
       }
       
-      // Detener timer
+      if (natureAudioRef.current) {
+        natureAudioRef.current.pause();
+        pausedTimeRef.current = natureAudioRef.current.currentTime;
+      }
+      
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
       
-      isPlayingRef.current = false;
       setIsPlaying(false);
       
     } else {
-      // REPRODUCIR
+      // REPRODUCIR - Restauramos el gain y reanudamos
       console.log('▶ Reproduciendo...');
       
-      // Reanudar audio de naturaleza
+      if (masterGainRef.current && audioContextRef.current) {
+        masterGainRef.current.gain.setValueAtTime(1, audioContextRef.current.currentTime);
+      }
+      
       if (natureAudioRef.current) {
+        natureAudioRef.current.currentTime = pausedTimeRef.current;
         natureAudioRef.current.play();
       }
       
-      // Reiniciar osciladores si es necesario
-      if (oscillatorsRef.current.length === 0 && audioContextRef.current) {
-        // Si no hay osciladores, necesitamos recrearlos
-        const profile = routine?.profile || 'alpha';
-        const beatFreq = 10;
-        const carrierFreq = 300;
-        createBinauralBeat(carrierFreq, beatFreq);
-      }
+      // Reanudar timer desde donde quedó
+      resumeTimer();
       
-      // Reiniciar timer
-      startTimer(20); // Duración por defecto
-      
-      isPlayingRef.current = true;
       setIsPlaying(true);
     }
   };
@@ -196,10 +177,30 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     }
     
     const durationSeconds = durationMinutes * 60;
-    const startTime = Date.now() - (currentTime * 1000);
+    startTimeRef.current = Date.now() - (pausedTimeRef.current * 1000);
     
     intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
+      const elapsed = (Date.now() - startTimeRef.current) / 1000;
+      const remaining = Math.max(0, durationSeconds - elapsed);
+      
+      setCurrentTime(elapsed);
+      
+      if (remaining <= 0) {
+        handleComplete();
+      }
+    }, 1000);
+  };
+
+  const resumeTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    const durationSeconds = (routine?.duration || 20) * 60;
+    startTimeRef.current = Date.now() - (currentTime * 1000);
+    
+    intervalRef.current = setInterval(() => {
+      const elapsed = (Date.now() - startTimeRef.current) / 1000;
       const remaining = Math.max(0, durationSeconds - elapsed);
       
       setCurrentTime(elapsed);
@@ -239,7 +240,7 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     
     oscillatorsRef.current = [];
     gainNodesRef.current = {};
-    isPlayingRef.current = false;
+    masterGainRef.current = null;
     setIsPlaying(false);
   };
 
@@ -248,11 +249,9 @@ export default function AudioPlayer({ routine, profile, onComplete, onBack }) {
     setVolume(prev => ({ ...prev, [type]: validatedValue }));
     
     if (type === 'beats' && gainNodesRef.current) {
-      Object.values(gainNodesRef.current).forEach(gain => {
-        if (gain && gain.gain) {
-          gain.gain.value = validatedValue;
-        }
-      });
+      if (gainNodesRef.current.left) gainNodesRef.current.left.gain.value = validatedValue;
+      if (gainNodesRef.current.right) gainNodesRef.current.right.gain.value = validatedValue;
+      if (gainNodesRef.current.main) gainNodesRef.current.main.gain.value = validatedValue;
     } else if (type === 'nature' && natureAudioRef.current) {
       natureAudioRef.current.volume = validatedValue;
     }
