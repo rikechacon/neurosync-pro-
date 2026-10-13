@@ -1,7 +1,7 @@
 name: Build Android App Bundle
 
 on:
-  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña "Actions"
+  workflow_dispatch:
 
 jobs:
   build:
