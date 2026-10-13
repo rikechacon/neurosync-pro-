@@ -26,6 +26,9 @@ jobs:
       - name: Instalar dependencias del frontend
         run: npm install
 
+      - name: Instalar Capacitor (si no está en package.json)
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android --save
+
       - name: Compilar frontend (Vite)
         run: npm run build
 
