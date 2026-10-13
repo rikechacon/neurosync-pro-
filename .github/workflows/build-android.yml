@@ -26,11 +26,17 @@ jobs:
       - name: Instalar dependencias del frontend
         run: npm install
 
-      - name: Instalar Capacitor (si no está en package.json)
+      - name: Instalar Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android --save
 
       - name: Compilar frontend (Vite)
         run: npm run build
+
+      - name: Inicializar Capacitor (si no existe capacitor.config)
+        run: npx cap init "NeuroSync Pro" com.neurosync.pro --web-dir=dist || true
+
+      - name: Agregar plataforma Android
+        run: npx cap add android
 
       - name: Sincronizar Capacitor
         run: npx cap sync android
