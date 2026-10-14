@@ -7,6 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -32,27 +35,17 @@ jobs:
       - name: Compilar frontend (Vite)
         run: npm run build
 
-      - name: Inicializar Capacitor (si no existe capacitor.config)
+      - name: Inicializar Capacitor (si no existe)
         run: npx cap init "NeuroSync Pro" com.neurosync.pro --web-dir=dist || true
 
       - name: Agregar plataforma Android
-        run: npx cap add android
+        run: npx cap add android || true
 
       - name: Sincronizar Capacitor
         run: npx cap sync android
 
       - name: Dar permisos a Gradle
         run: chmod +x ./android/gradlew
-
-      - name: Configurar variables de entorno Android
-        run: |
-          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-
-      - name: Aceptar licencias de Android
-        run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Construir App Bundle (.aab)
         run: cd android && ./gradlew bundleRelease --no-daemon
