@@ -47,9 +47,20 @@ jobs:
       - name: Dar permisos a Gradle
         run: chmod +x ./android/gradlew
 
-      - name: Forzar Gradle 8.9 (Requerido por Android Gradle Plugin)
+      - name: Forzar Gradle 8.9
         run: |
           echo 'distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip' > android/gradle/wrapper/gradle-wrapper.properties
+
+      - name: Fix Kotlin - Agregar resolución de dependencias en app/build.gradle
+        run: |
+          echo '' >> android/app/build.gradle
+          echo 'configurations.all {' >> android/app/build.gradle
+          echo '    resolutionStrategy {' >> android/app/build.gradle
+          echo '        force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"' >> android/app/build.gradle
+          echo '        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"' >> android/app/build.gradle
+          echo '        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"' >> android/app/build.gradle
+          echo '    }' >> android/app/build.gradle
+          echo '}' >> android/app/build.gradle
 
       - name: Construir App Bundle (.aab)
         run: cd android && ./gradlew bundleRelease --no-daemon
