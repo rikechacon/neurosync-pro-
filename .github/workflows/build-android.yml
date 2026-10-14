@@ -47,30 +47,28 @@ jobs:
       - name: Dar permisos a Gradle
         run: chmod +x ./android/gradlew
 
-      - name: Fix Gradle 8 - Reemplazar build.gradle con versión compatible
+      - name: Fix Gradle 8 - Reemplazar build.gradle
         run: |
-          cat > android/build.gradle << 'GRADLE_EOF'
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0'
-    }
-}
+          echo 'buildscript {
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                classpath "com.android.tools.build:gradle:8.1.0"
+            }
+          }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+          allprojects {
+            repositories {
+                google()
+                mavenCentral()
+            }
+          }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-GRADLE_EOF
+          task clean(type: Delete) {
+            delete rootProject.buildDir
+          }' > android/build.gradle
 
       - name: Construir App Bundle (.aab)
         run: cd android && ./gradlew bundleRelease --no-daemon
