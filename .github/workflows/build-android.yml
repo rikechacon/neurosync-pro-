@@ -47,10 +47,19 @@ jobs:
       - name: Dar permisos a Gradle
         run: chmod +x ./android/gradlew
 
-      - name: Fix conflicto de versiones de Kotlin
+      - name: Fix conflicto de Kotlin - Agregar resolución de dependencias
         run: |
-          sed -i 's/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:\$kotlin_version"/implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"/g' android/app/build.gradle
-          sed -i 's/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:\$kotlin_version"/implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"/g' android/app/build.gradle
+          # Agregar configuración de resolución al build.gradle del app
+          cat >> android/app/build.gradle << 'GRADLE_EOF'
+
+          configurations.all {
+              resolutionStrategy {
+                  force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+                  force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
+                  force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
+              }
+          }
+          GRADLE_EOF
 
       - name: Construir App Bundle (.aab)
         run: cd android && ./gradlew bundleRelease --no-daemon
