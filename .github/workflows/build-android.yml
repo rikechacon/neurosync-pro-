@@ -20,11 +20,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Configurar Java 21
-        uses: actions/setup-java@v5
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '17'
 
       - name: Instalar dependencias del frontend
         run: npm install
@@ -47,28 +47,9 @@ jobs:
       - name: Dar permisos a Gradle
         run: chmod +x ./android/gradlew
 
-      - name: Fix Gradle 8 - Reemplazar build.gradle
+      - name: Forzar Gradle 7 (Compatible con Capacitor)
         run: |
-          echo 'buildscript {
-            repositories {
-                google()
-                mavenCentral()
-            }
-            dependencies {
-                classpath "com.android.tools.build:gradle:8.1.0"
-            }
-          }
-
-          allprojects {
-            repositories {
-                google()
-                mavenCentral()
-            }
-          }
-
-          task clean(type: Delete) {
-            delete rootProject.buildDir
-          }' > android/build.gradle
+          echo 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-all.zip' > android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Construir App Bundle (.aab)
         run: cd android && ./gradlew bundleRelease --no-daemon
