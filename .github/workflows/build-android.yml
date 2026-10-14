@@ -47,11 +47,30 @@ jobs:
       - name: Dar permisos a Gradle
         run: chmod +x ./android/gradlew
 
-      - name: Fix Gradle 8 - Eliminar repositorios duplicados del build.gradle raíz
+      - name: Fix Gradle 8 - Reemplazar build.gradle con versión compatible
         run: |
-          # Eliminar el bloque allprojects { repositories { ... } } del android/build.gradle
-          # porque Gradle 8 ya los maneja en settings.gradle
-          sed -i '/allprojects {/,/}/d' android/build.gradle
+          cat > android/build.gradle << 'GRADLE_EOF'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+GRADLE_EOF
 
       - name: Construir App Bundle (.aab)
         run: cd android && ./gradlew bundleRelease --no-daemon
