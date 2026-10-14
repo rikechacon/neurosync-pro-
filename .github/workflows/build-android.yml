@@ -47,9 +47,9 @@ jobs:
       - name: Dar permisos a Gradle
         run: chmod +x ./android/gradlew
 
-      - name: Forzar Gradle 7 (Compatible con Capacitor)
+      - name: Forzar Gradle 8.9 (Requerido por Android Gradle Plugin)
         run: |
-          echo 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-all.zip' > android/gradle/wrapper/gradle-wrapper.properties
+          echo 'distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip' > android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Construir App Bundle (.aab)
         run: cd android && ./gradlew bundleRelease --no-daemon
