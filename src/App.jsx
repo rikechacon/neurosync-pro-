@@ -36,7 +36,6 @@ function App() {
     const sessions = JSON.parse(localStorage.getItem('completed_sessions') || '[]');
     const sessionsUsed = sessions.length;
     const MAX_FREE = 3;
-
     const trialData = localStorage.getItem(`trial_${user?.email}`);
     let trialActive = false;
     if (trialData) {
@@ -45,9 +44,8 @@ function App() {
         trialActive = true;
       }
     }
-
     if (sessionsUsed >= MAX_FREE && !trialActive) {
-      setShowPaywall(true);
+      // setShowPaywall(true);  // ✅ COMENTADO - App 100% gratis
     }
   };
 
@@ -76,31 +74,27 @@ function App() {
     const answers = routine.answers || {};
     const profile = getSessionProfile(answers);
     const optimalDuration = calculateOptimalDuration(profile, answers);
-    
     const enhancedRoutine = {
-      ...routine,
-      duration: optimalDuration,
-      profile: profile.id,
-      profileName: profile.name
-    };
-    
-    setCurrentRoutine(enhancedRoutine);
-    setSessionProfile(profile);
-    
-    if (user) {
-      try {
-        await routinesAPI.create({
-          ...enhancedRoutine,
-          beatFreq: routine.beatFreq || profile.defaultBeatFreq || 10,
-          carrierFreq: routine.carrierFreq || profile.carrierFreq || 300,
-          name: routine.name || `Sesión ${new Date().toLocaleDateString()}`
-        });
-      } catch (error) {
-        console.error('Error guardando rutina:', error);
-      }
-    }
-    
-    setCurrentView('playing');
+       ...routine,
+       duration: optimalDuration,
+       profile: profile.id,
+       profileName: profile.name
+     };
+     setCurrentRoutine(enhancedRoutine);
+     setSessionProfile(profile);
+     if (user) {
+       try {
+         await routinesAPI.create({
+           ...enhancedRoutine,
+           beatFreq: routine.beatFreq || profile.defaultBeatFreq || 10,
+           carrierFreq: routine.carrierFreq || profile.carrierFreq || 300,
+           name: routine.name || `Sesión ${new Date().toLocaleDateString()}`
+         });
+       } catch (error) {
+         console.error('Error guardando rutina:', error);
+       }
+     }
+     setCurrentView('playing');
   };
 
   const handleSessionComplete = async () => {
@@ -148,12 +142,36 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <h1 className="app-title" onClick={handleBackToHome} style={{ cursor: currentView !== 'home' ? 'pointer' : 'default' }}>
-            🧠 NeuroSync Pro
+             NeuroSync Pro
           </h1>
           <p className="app-subtitle">Estimulación neurosensorial personalizada con IA</p>
           
           <div className="header-actions">
             <span className="user-greeting">👋 {user.name || user.email}</span>
+            
+            {/* 👑 BOTÓN PREMIUM - Placeholder para futura monetización */}
+            <button 
+              onClick={() => setShowPaywall(true)} 
+              className="premium-button"
+              style={{
+                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                marginRight: '10px',
+                boxShadow: '0 2px 8px rgba(245, 87, 108, 0.4)',
+                transition: 'transform 0.2s',
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+            >
+              👑 Premium
+            </button>
+            
             <button onClick={handleLogout} className="logout-button">Cerrar Sesión</button>
           </div>
           
@@ -179,7 +197,6 @@ function App() {
             selectedCategory={selectedCategory}
           />
         )}
-        
         {currentView === 'questionnaire' && (
           <Questionnaire 
             onComplete={handleQuestionnaireComplete} 
@@ -187,25 +204,24 @@ function App() {
             selectedCategory={selectedCategory}
           />
         )}
-        
         {currentView === 'playing' && currentRoutine && (
-          <>
-            <AudioPlayer 
-              routine={currentRoutine}
-              profile={sessionProfile}
-              onComplete={handleSessionComplete}
-              onBack={handleBackToHome}
-            />
-            {showPaywall && (
-              <Paywall 
-                user={user}
-                onSubscribe={handleSubscribe}
-                onClose={() => setShowPaywall(false)}
-              />
-            )}
-          </>
+          <AudioPlayer 
+            routine={currentRoutine}
+            profile={sessionProfile}
+            onComplete={handleSessionComplete}
+            onBack={handleBackToHome}
+          />
         )}
       </main>
+
+      {/* Paywall Modal - Ahora solo informativo (sin Gumroad) */}
+      {showPaywall && (
+        <Paywall 
+          user={user}
+          onSubscribe={handleSubscribe}
+          onClose={() => setShowPaywall(false)}
+        />
+      )}
 
       <footer className="app-footer">
         <p>© 2026 NeuroSync Pro • Usa auriculares estéreo para mejor experiencia</p>
@@ -219,6 +235,7 @@ function App() {
 
 function AuthView({ onLogin, onRegister }) {
   const [isLogin, setIsLogin] = useState(true);
+  
   return isLogin ? (
     <Login onLogin={onLogin} onSwitchToRegister={() => setIsLogin(false)} />
   ) : (
@@ -228,7 +245,7 @@ function AuthView({ onLogin, onRegister }) {
 
 // 7 CATEGORÍAS - INCLUYENDO CREATIVIDAD Y SANACIÓN
 const HOME_CATEGORIES = [
-  { id: 'relax', icon: '🌙', name: 'Relajación', desc: 'Reduce estrés y ansiedad' },
+  { id: 'relax', icon: '', name: 'Relajación', desc: 'Reduce estrés y ansiedad' },
   { id: 'focus', icon: '🎯', name: 'Concentración', desc: 'Mejora tu enfoque mental' },
   { id: 'sleep', icon: '😴', name: 'Sueño Profundo', desc: 'Duerme mejor y más profundo' },
   { id: 'energy', icon: '⚡', name: 'Energía', desc: 'Aumenta tu vitalidad' },
@@ -248,7 +265,7 @@ function HomeView({ onStart, user, btStatus, selectedCategory }) {
         <h2>Bienvenido{user.name ? `, ${user.name}` : ''} a NeuroSync Pro</h2>
         <p>Selecciona una categoría para comenzar tu sesión personalizada</p>
       </div>
-
+      
       <div className="categories-grid">
         {HOME_CATEGORIES.map((category) => (
           <div 
@@ -264,7 +281,7 @@ function HomeView({ onStart, user, btStatus, selectedCategory }) {
           </div>
         ))}
       </div>
-
+      
       {btStatus && !btStatus.supported && (
         <div className="notice-card warning">
           <p>⚠️ {btStatus.message}</p>
