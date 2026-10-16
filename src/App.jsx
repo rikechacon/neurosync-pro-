@@ -45,7 +45,7 @@ function App() {
       }
     }
     if (sessionsUsed >= MAX_FREE && !trialActive) {
-      // setShowPaywall(true);  // ✅ COMENTADO - App 100% gratis
+      // setShowPaywall(true); // ✅ DESACTIVADO: App 100% gratis
     }
   };
 
@@ -142,7 +142,7 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <h1 className="app-title" onClick={handleBackToHome} style={{ cursor: currentView !== 'home' ? 'pointer' : 'default' }}>
-             NeuroSync Pro
+             🧠 NeuroSync Pro
           </h1>
           <p className="app-subtitle">Estimulación neurosensorial personalizada con IA</p>
           
@@ -205,23 +205,23 @@ function App() {
           />
         )}
         {currentView === 'playing' && currentRoutine && (
-          <AudioPlayer 
-            routine={currentRoutine}
-            profile={sessionProfile}
-            onComplete={handleSessionComplete}
-            onBack={handleBackToHome}
-          />
+          <>
+            <AudioPlayer 
+              routine={currentRoutine}
+              profile={sessionProfile}
+              onComplete={handleSessionComplete}
+              onBack={handleBackToHome}
+            />
+            {showPaywall && (
+              <Paywall 
+                user={user}
+                onSubscribe={handleSubscribe}
+                onClose={() => setShowPaywall(false)}
+              />
+            )}
+          </>
         )}
       </main>
-
-      {/* Paywall Modal - Ahora solo informativo (sin Gumroad) */}
-      {showPaywall && (
-        <Paywall 
-          user={user}
-          onSubscribe={handleSubscribe}
-          onClose={() => setShowPaywall(false)}
-        />
-      )}
 
       <footer className="app-footer">
         <p>© 2026 NeuroSync Pro • Usa auriculares estéreo para mejor experiencia</p>
@@ -243,9 +243,8 @@ function AuthView({ onLogin, onRegister }) {
   );
 }
 
-// 7 CATEGORÍAS - INCLUYENDO CREATIVIDAD Y SANACIÓN
 const HOME_CATEGORIES = [
-  { id: 'relax', icon: '', name: 'Relajación', desc: 'Reduce estrés y ansiedad' },
+  { id: 'relax', icon: '🌙', name: 'Relajación', desc: 'Reduce estrés y ansiedad' },
   { id: 'focus', icon: '🎯', name: 'Concentración', desc: 'Mejora tu enfoque mental' },
   { id: 'sleep', icon: '😴', name: 'Sueño Profundo', desc: 'Duerme mejor y más profundo' },
   { id: 'energy', icon: '⚡', name: 'Energía', desc: 'Aumenta tu vitalidad' },
